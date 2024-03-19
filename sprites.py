@@ -10,9 +10,7 @@ DEATH = 5
 
 class Spritesheet(object):
     def __init__(self):
-        self.sheet = pygame.image.load(os.path.join('assets', "spritesheet.png")).convert()
-        transcolor = self.sheet.get_at((0,0))
-        self.sheet.set_colorkey(transcolor)
+        self.sheet = pygame.image.load(os.path.join('assets', "spritesheet_alpha.png")).convert()
         width = int(self.sheet.get_width() / BASETILEWIDTH * TILEWIDTH)
         height = int(self.sheet.get_height() / BASETILEHEIGHT * TILEHEIGHT)
         self.sheet = pygame.transform.scale(self.sheet, (width, height))
