@@ -1,4 +1,5 @@
 import pygame
+import os
 from pygame.locals import *
 from constants import *
 from pacman import Pacman
@@ -48,13 +49,13 @@ class GameController(object):
 
     def startGame(self):      
         self.mazedata.loadMaze(self.level)
-        self.mazesprites = MazeSprites(self.mazedata.obj.name+".txt", self.mazedata.obj.name+"_rotation.txt")
+        self.mazesprites = MazeSprites(os.path.join('assets', self.mazedata.obj.name+".txt"), os.path.join('assets', self.mazedata.obj.name+"_rotation.txt"))
         self.setBackground()
-        self.nodes = NodeGroup(self.mazedata.obj.name+".txt")
+        self.nodes = NodeGroup(os.path.join('assets', self.mazedata.obj.name+".txt"))
         self.mazedata.obj.setPortalPairs(self.nodes)
         self.mazedata.obj.connectHomeNodes(self.nodes)
         self.pacman = Pacman(self.nodes.getNodeFromTiles(*self.mazedata.obj.pacmanStart))
-        self.pellets = PelletGroup(self.mazedata.obj.name+".txt")
+        self.pellets = PelletGroup(os.path.join('assets', self.mazedata.obj.name+".txt"))
         self.ghosts = GhostGroup(self.nodes.getStartTempNode(), self.pacman)
 
         self.ghosts.pinky.setStartNode(self.nodes.getNodeFromTiles(*self.mazedata.obj.addOffset(2, 3)))
@@ -71,15 +72,15 @@ class GameController(object):
 
     def startGame_old(self):      
         self.mazedata.loadMaze(self.level)#######
-        self.mazesprites = MazeSprites("maze1.txt", "maze1_rotation.txt")
+        self.mazesprites = MazeSprites(os.path.join('assets', "maze1.txt"), os.path.join('assets', "maze1_rotation.txt"))
         self.setBackground()
-        self.nodes = NodeGroup("maze1.txt")
+        self.nodes = NodeGroup(os.path.join('assets', "maze1.txt"))
         self.nodes.setPortalPair((0,17), (27,17))
         homekey = self.nodes.createHomeNodes(11.5, 14)
         self.nodes.connectHomeNodes(homekey, (12,14), LEFT)
         self.nodes.connectHomeNodes(homekey, (15,14), RIGHT)
         self.pacman = Pacman(self.nodes.getNodeFromTiles(15, 26))
-        self.pellets = PelletGroup("maze1.txt")
+        self.pellets = PelletGroup(os.path.join('assets', "maze1.txt"))
         self.ghosts = GhostGroup(self.nodes.getStartTempNode(), self.pacman)
         self.ghosts.blinky.setStartNode(self.nodes.getNodeFromTiles(2+11.5, 0+14))
         self.ghosts.pinky.setStartNode(self.nodes.getNodeFromTiles(2+11.5, 3+14))
