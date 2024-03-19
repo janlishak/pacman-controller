@@ -3,6 +3,7 @@ from entity import Entity
 from constants import *
 from sprites import FruitSprites
 
+
 class Fruit(Entity):
     def __init__(self, node, level=0):
         Entity.__init__(self, node)

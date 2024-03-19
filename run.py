@@ -11,8 +11,7 @@ from pauser import Pause
 from text import TextGroup
 from sprites import LifeSprites
 from sprites import MazeSprites
-from mazes import MazeController
-from mazedata import MazeData######
+from mazedata import MazeData
 
 class GameController(object):
     def __init__(self):
@@ -34,7 +33,6 @@ class GameController(object):
         self.flashTimer = 0
         self.fruitCaptured = []
         self.fruitNode = None
-        self.maze = MazeController()
         self.mazedata = MazeData()######
 
     def setBackground(self):
@@ -220,7 +218,7 @@ class GameController(object):
 
     def render(self):
         self.screen.blit(self.background, (0, 0))
-        #self.nodes.render(self.screen)
+        # self.nodes.render(self.screen)
         self.pellets.render(self.screen)
         if self.fruit is not None:
             self.fruit.render(self.screen)
