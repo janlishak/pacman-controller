@@ -26,6 +26,7 @@ class MainMode(object):
 
 class ModeController(object):
     def __init__(self, entity):
+        print("created")
         self.timer = 0
         self.time = None
         self.mainmode = MainMode()

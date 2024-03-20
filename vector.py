@@ -49,3 +49,6 @@ class Vector2(object):
 
     def __str__(self):
         return "<"+str(self.x)+", "+str(self.y)+">"
+
+    def distanceTo(self, other):
+        return max(abs(self.x - other.x), abs(self.y - other.y))

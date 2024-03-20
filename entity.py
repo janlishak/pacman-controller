@@ -1,5 +1,7 @@
 import pygame
 from pygame.locals import *
+
+from debug import debug_use_color, debug_get_speed
 from vector import Vector2
 from constants import *
 from random import randint
@@ -110,15 +112,16 @@ class Entity(object):
     def reset(self):
         self.setStartNode(self.startNode)
         self.direction = STOP
-        self.speed = 100
+        self.setSpeed(100)
         self.visible = True
+        print("speed set to" + str(self.speed))
 
     def setSpeed(self, speed):
-        self.speed = speed * TILEWIDTH / 16
+        self.speed = debug_get_speed() * speed * TILEWIDTH / 16
 
     def render(self, screen):
         if self.visible:
-            if self.image is not None:
+            if self.image is not None and not debug_use_color():
                 adjust = Vector2(TILEWIDTH, TILEHEIGHT) / 2
                 p = self.position - adjust
                 screen.blit(self.image, p.asTuple())

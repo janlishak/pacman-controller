@@ -1,5 +1,7 @@
 import pygame
 from pygame.locals import *
+
+from debug import debug_ping
 from vector import Vector2
 from constants import *
 from entity import Entity
@@ -128,7 +130,8 @@ class GhostGroup(object):
         self.pinky = Pinky(node, pacman)
         self.inky = Inky(node, pacman, self.blinky)
         self.clyde = Clyde(node, pacman)
-        self.ghosts = [self.blinky, self.pinky, self.inky, self.clyde]
+        self.ghosts = [self.blinky]
+        #not all ghosts
 
     def __iter__(self):
         return iter(self.ghosts)
@@ -169,4 +172,6 @@ class GhostGroup(object):
     def render(self, screen):
         for ghost in self:
             ghost.render(screen)
+            #debug
+            debug_ping(ghost.goal.asTuple(), color=ghost.color)
 

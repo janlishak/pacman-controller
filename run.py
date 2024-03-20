@@ -2,6 +2,7 @@ import pygame
 import os
 from pygame.locals import *
 from constants import *
+from debug import debug_points, debug_clear, debug_ping, debug_get_fps
 from pacman import Pacman
 from nodes import NodeGroup
 from pellets import PelletGroup
@@ -12,7 +13,7 @@ from text import TextGroup
 from sprites import LifeSprites
 from sprites import MazeSprites
 from mazedata import MazeData
-
+import time
 class GameController(object):
     def __init__(self):
         pygame.init()
@@ -33,7 +34,7 @@ class GameController(object):
         self.flashTimer = 0
         self.fruitCaptured = []
         self.fruitNode = None
-        self.mazedata = MazeData()######
+        self.mazedata = MazeData()
 
     def setBackground(self):
         self.background_norm = pygame.surface.Surface(SCREENSIZE).convert()
@@ -68,12 +69,20 @@ class GameController(object):
         self.ghosts.clyde.startNode.denyAccess(LEFT, self.ghosts.clyde)
         self.mazedata.obj.denyGhostsAccess(self.ghosts, self.nodes)
 
+        self.pacman.ghosts = self.ghosts
+
+        # d = self.nodes.nodesLUT.items()
+        # i = 0
+        # for key, value in d:
+        #     i+=1
+        #     debug_ping(key)
+
     def update(self):
-        dt = self.clock.tick(30) / 1000.0
+        dt = self.clock.tick(debug_get_fps()) / 1000.0
         self.textgroup.update(dt)
         self.pellets.update(dt)
         if not self.pause.paused:
-            self.ghosts.update(dt)      
+            self.ghosts.update(dt)
             if self.fruit is not None:
                 self.fruit.update(dt)
             self.checkPelletEvents()
@@ -235,6 +244,12 @@ class GameController(object):
             x = SCREENWIDTH - self.fruitCaptured[i].get_width() * (i+1)
             y = SCREENHEIGHT - self.fruitCaptured[i].get_height()
             self.screen.blit(self.fruitCaptured[i], (x, y))
+
+        # debug points
+        dp = debug_points()
+        for i in range(len(dp)):
+            pygame.draw.circle(self.screen, dp[i][1], (dp[i][0][0]+(i*2) , dp[i][0][1]+(i*2)), 10)
+        debug_clear()
 
         pygame.display.update()
 
