@@ -1,7 +1,7 @@
 import pygame
 from pygame.locals import *
 
-from debug import debug_ping
+from debug import debug_ping, debug_clear
 from do import DynamicObject
 from vector import Vector2
 from constants import *
@@ -37,6 +37,9 @@ class Pacman(Entity):
 
         if self.overshotTarget():
             # print("decision point")
+            # clear debug
+            debug_clear('cross')
+
             self.node = self.target
             if self.node.neighbors[PORTAL] is not None:
                 self.node = self.node.neighbors[PORTAL]
@@ -47,14 +50,15 @@ class Pacman(Entity):
             dc = 0
             for dir in self.node.neighbors:
                 dc+=1
-                if dc==2:
-                    break
+                # if dc==2:
+                #     break
                 if dir == -1 * self.direction:
                     continue
                 node = self.node.neighbors[dir]
                 if node is not None:
+
                     # next option
-                    debug_ping(node.position.asTuple(), (200, 0, 200))
+                    debug_ping(node.position.asTuple(), (200, 0, 200), "cross")
                     next_option = DynamicObject()
                     next_option.xy = node.position.asTuple()
                     next_option.weight = node.position.distanceTo(self.target.position)
@@ -66,7 +70,7 @@ class Pacman(Entity):
                     fblinky = {"a": blinky.node.position, "b": blinky.target.position,
                                "p": blinky.position + blinky.directions[
                                    blinky.direction] * blinky.speed * next_option.delta}
-                    debug_ping(fblinky["p"].asTuple(), (0,200,0))
+                    debug_ping(fblinky["p"].asTuple(), (0, 200, 0), "cross")
 
                     # check for over shooting
                     # vec1 = fblinky["a"] - fblinky["b"]
@@ -80,18 +84,18 @@ class Pacman(Entity):
                         print("done")
                     else:
                         fblinky["a"] = fblinky["b"]
-                        directions = blinky.validDirections()
-                        direction = self.directionMethod(directions)
-                        if not self.disablePortal:
-                            if self.node.neighbors[PORTAL] is not None:
-                                self.node = self.node.neighbors[PORTAL]
-                        self.target = self.getNewTarget(direction)
-                        if self.target is not self.node:
-                            self.direction = direction
-                        else:
-                            self.target = self.getNewTarget(self.direction)
-
-                        self.setPosition()
+                        # directions = blinky.validDirections()
+                        # direction = self.directionMethod(directions)
+                        # if not self.disablePortal:
+                        #     if self.node.neighbors[PORTAL] is not None:
+                        #         self.node = self.node.neighbors[PORTAL]
+                        # self.target = self.getNewTarget(direction)
+                        # if self.target is not self.node:
+                        #     self.direction = direction
+                        # else:
+                        #     self.target = self.getNewTarget(self.direction)
+                        #
+                        # self.setPosition()
 
 
 

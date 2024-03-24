@@ -248,9 +248,9 @@ class GameController(object):
         # debug points
         dp = debug_points()
         for i in range(len(dp)):
-            pygame.draw.circle(self.screen, dp[i][1], (dp[i][0][0]+(i*2) , dp[i][0][1]+(i*2)), 10)
-        debug_clear()
+            pygame.draw.circle(self.screen, dp[i][1], (dp[i][0][0] + 8, dp[i][0][1] + 8), 8)  #
 
+        debug_clear("frame")
         pygame.display.update()
 
 
