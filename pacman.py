@@ -1,7 +1,7 @@
 import pygame
 from pygame.locals import *
 
-from debug import debug_point, debug_clear, debug_line
+from debug import debug_point, debug_clear, debug_line, debug_clear_all
 from do import DynamicObject, GameState
 from vector import Vector2
 from constants import *
@@ -68,7 +68,8 @@ class Pacman(Entity):
         if self.overshotTarget():
             # PAC-MAN AT CROSS ROAD
             self.node = self.target
-            debug_clear(self.direction)
+            debug_clear_all()
+
 
             # PORTALS
             if self.node.neighbors[PORTAL] is not None:
@@ -77,6 +78,7 @@ class Pacman(Entity):
             init_gs = GameState()
 
             # pacman state
+            init_gs.level = 0
             init_gs.pacman_s = self.speed
             init_gs.pacman_node = self.node
 
@@ -89,16 +91,19 @@ class Pacman(Entity):
             init_gs.blinky_dv = DIR2VEC[self.ghosts.blinky.direction]
             init_gs.blinky_d = self.ghosts.blinky.direction
 
-            # init_gs -->
-            next_options = []
-            predict(init_gs, next_options)
+            # MAKE PREDICTIONS
+            options = []
+            predict(init_gs, options)
 
-            print(next_options)
-
-
-
-            # finally, set the direction
+            # CHOOSE
             direction = self.getValidKey()
+            if direction == STOP:
+                direction = self.direction
+
+            for option in init_gs.child:
+                if option.dir != direction:
+                    debug_clear("1:" + str(option.dir))
+
 
             # set new target_node
             self.target = self.getNewTarget(direction)
@@ -111,10 +116,7 @@ class Pacman(Entity):
                 self.direction = STOP
             self.setPosition()
 
-            # clear other tags
-            for dd in self.directions:
-                if dd != self.direction:
-                    debug_clear(dd)
+
         else:
             # PAC-MAN BETWEEN CROSSROADS
             direction = self.getValidKey()
@@ -126,14 +128,15 @@ def predict(init_gs, next_options):
     for dir in init_gs.pacman_node.neighbors:
         target_node = init_gs.pacman_node.neighbors[dir]
         if target_node is not None:
-            # (debug) draw purple dot and line
-            dir_tag = dir
-            debug_point(target_node.position.asTuple(), (200, 0, 200), dir_tag)
-            debug_line(target_node.position.asTuple(), init_gs.pacman_node.position.asTuple(),
-                       (200, 0, 200), dir_tag)
-
             # create new game_state
             gs = GameState()
+            gs.level = init_gs.level + 1
+            gs.dir = dir
+            gs.dir_tag = str(gs.level) + ":" + str(dir)
+
+            # add as child
+            init_gs.child.append(gs)
+            gs.parent = init_gs
 
             # blinky clone
             gs.blinky_a = init_gs.blinky_a
@@ -150,11 +153,14 @@ def predict(init_gs, next_options):
             time_to_target = gs.blinky_p.distanceTo(gs.blinky_b) / gs.blinky_s
             segment_num = 0
 
+            # (debug) draw purple dot and line
+            debug_point(target_node.position.asTuple(), (200, 0, 200), gs.dir_tag)
+            debug_line(target_node.position.asTuple(), init_gs.pacman_node.position.asTuple(), (200, 0, 200), gs.dir_tag)
+
             while time_to_target < remaining_move_time:
                 # blinky first segment
                 blinky_next_point = gs.blinky_p + (gs.blinky_d * gs.blinky_s * time_to_target)
-                debug_line(gs.blinky_a.asTuple(), blinky_next_point.asTuple(), LINE_COLORS[segment_num],
-                           tag=dir_tag)
+                debug_line(gs.blinky_a.asTuple(), blinky_next_point.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
                 segment_num = (segment_num + 1) % 4
 
                 # predict next direction
@@ -164,13 +170,13 @@ def predict(init_gs, next_options):
                 best_h = 100000000
                 goal = init_gs.pacman_node.position + (
                             DIR2VEC[dir] * (delta - remaining_move_time) * init_gs.pacman_s)
-                debug_point(goal.asTuple(), LINE_COLORS[segment_num], tag=dir_tag)
+                debug_point(goal.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
                 for next_direction in [UP, DOWN, LEFT, RIGHT]:
                     neigh = gs.blinky_bn.neighbors[next_direction]
                     if next_direction != gs.blinky_dn * -1 and neigh is not None and BLINKY in \
                             gs.blinky_bn.access[next_direction]:
                         h = (neigh.position - goal).magnitudeSquared()
-                        # debug_line(goal.asTuple(), neigh.position.asTuple(), LINE_COLORS[segment_num], tag=dir_tag)
+                        # debug_line(goal.asTuple(), neigh.position.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
                         if h < best_h:
                             best_h = h
                             best_direction = next_direction
@@ -188,7 +194,7 @@ def predict(init_gs, next_options):
             # blinky last segment
             blinky_next_point = gs.blinky_p + (gs.blinky_d * gs.blinky_s * remaining_move_time)
             debug_line(gs.blinky_a.asTuple(), blinky_next_point.asTuple(), LINE_COLORS[segment_num],
-                       tag=dir_tag)
+                       tag=gs.dir_tag)
 
             # move pacman
             gs.pacman_s = init_gs.pacman_s

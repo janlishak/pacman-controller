@@ -21,6 +21,10 @@ def debug_clear(tag):
         return
 
     points[tag]=[]
+
+def debug_clear_all():
+    global points
+    points = {}
 def debug_use_color():
     return False
 

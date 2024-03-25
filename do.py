@@ -13,4 +13,25 @@ class DynamicObject:
 
 class GameState:
     def __init__(self):
-        self.next = None
+        # state
+        self.level = None
+        self.dir = None
+        self.dir_tag = None
+        self.child = []
+        self.parent = None
+
+        # pacman
+        self.pacman_s = None
+        self.pacman_node = None
+
+        # blinky
+        self.blinky_a = None
+        self.blinky_b = None
+        self.blinky_bn = None
+        self.blinky_p = None
+        self.blinky_s = None
+        self.blinky_dv = None
+        self.blinky_d = None
+
+    def __str__(self):
+        return f"Level: {self.level}, Direction: {self.dir}"
