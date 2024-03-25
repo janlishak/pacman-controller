@@ -2,7 +2,7 @@ import pygame
 import os
 from pygame.locals import *
 from constants import *
-from debug import debug_points, debug_clear, debug_ping, debug_get_fps
+from debug import debug_points, debug_clear, debug_point, debug_get_fps
 from pacman import Pacman
 from nodes import NodeGroup
 from pellets import PelletGroup
@@ -247,8 +247,15 @@ class GameController(object):
 
         # debug points
         dp = debug_points()
+        radius = 6
         for i in range(len(dp)):
-            pygame.draw.circle(self.screen, dp[i][1], (dp[i][0][0] + 8, dp[i][0][1] + 8), 8)  #
+            draw_call = dp[i]
+            # print(draw_call)
+            if draw_call[0] == "point":
+                pygame.draw.circle(self.screen, draw_call[1], (draw_call[2][0]+radius, draw_call[2][1]+radius), radius)
+            if draw_call[0] == "line":
+                pygame.draw.line(self.screen, draw_call[1], (draw_call[2][0]+radius, draw_call[2][1]+radius), (draw_call[3][0]+radius, draw_call[3][1]+radius))
+            # time.sleep(0.01)
 
         debug_clear("frame")
         pygame.display.update()

@@ -1,7 +1,7 @@
 import pygame
 from pygame.locals import *
 
-from debug import debug_ping
+from debug import debug_point
 from vector import Vector2
 from constants import *
 from entity import Entity
@@ -173,5 +173,5 @@ class GhostGroup(object):
         for ghost in self:
             ghost.render(screen)
             #debug
-            debug_ping(ghost.goal.asTuple(), color=ghost.color)
+            debug_point(ghost.goal.asTuple(), color=ghost.color)
 

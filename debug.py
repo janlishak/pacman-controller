@@ -1,8 +1,13 @@
 points = {}
-def debug_ping(x, color=None, tag="frame"):
+def debug_point(xy, color=None, tag="frame"):
     if(points.get(tag) == None):
         points[tag] = []
-    points[tag].append((x, color))
+    points[tag].append(("point", color, xy))
+
+def debug_line(xy1, xy2, color=None, tag="frame"):
+    if(points.get(tag) == None):
+        points[tag] = []
+    points[tag].append(("line", color, xy1, xy2))
 def debug_points():
     points_list = []
     for key in points:
