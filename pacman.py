@@ -38,11 +38,7 @@ class Pacman(Entity):
         if self.overshotTarget():
             # print("decision point")
             # clear debug
-            debug_clear(1)
-            debug_clear(-1)
-            debug_clear(2)
-            debug_clear(-2)
-            debug_clear(0)
+            debug_clear(self.direction)
 
             self.node = self.target
             if self.node.neighbors[PORTAL] is not None:
