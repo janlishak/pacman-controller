@@ -2,16 +2,17 @@ import pygame
 from pygame.locals import *
 
 from debug import debug_point, debug_clear, debug_line
-from do import DynamicObject
+from do import DynamicObject, GameState
 from vector import Vector2
 from constants import *
 from entity import Entity
 from sprites import PacmanSprites
 
+
 class Pacman(Entity):
     def __init__(self, node):
         Entity.__init__(self, node )
-        self.name = PACMAN    
+        self.name = PACMAN
         self.color = YELLOW
         self.direction = LEFT
         self.setBetweenNodes(LEFT)
@@ -31,165 +32,6 @@ class Pacman(Entity):
         self.alive = False
         self.direction = STOP
 
-    def update(self, dt):
-        self.sprites.update(dt)
-        self.position += self.directions[self.direction]*self.speed*dt
-
-        if self.overshotTarget():
-            # print("decision point")
-            # clear debug
-            debug_clear(self.direction)
-
-            self.node = self.target
-            if self.node.neighbors[PORTAL] is not None:
-                self.node = self.node.neighbors[PORTAL]
-
-            option = DynamicObject()
-            option.xy = self.target.position.asTuple()
-            option.options = []
-            # dc = 0
-            for dir in self.node.neighbors:
-                dir_tag = dir
-                # dc+=1
-                # if dc==2:
-                #     break
-                # if dir == -1 * self.direction:
-                #     continue
-                node = self.node.neighbors[dir]
-                if node is not None:
-                    # next option
-                    debug_point(node.position.asTuple(), (200, 0, 200), dir_tag)
-                    debug_line(node.position.asTuple(), option.xy, (200, 0, 200), dir_tag)
-
-                    next_option = DynamicObject()
-                    next_option.xy = node.position.asTuple()
-                    next_option.weight = node.position.distanceTo(self.target.position)
-                    next_option.delta = next_option.weight/self.speed
-                    # print(next_option.delta)
-
-                    # blinky
-                    blinky = self.ghosts.blinky
-                    blnk = {
-                        "a": blinky.node.position,
-                        "b": blinky.target.position,
-                        "bn": blinky.target,
-                        "p": blinky.position,
-                        "s": blinky.speed,
-                        "d": blinky.directions[blinky.direction],
-                        "dn": blinky.direction,
-                        "q": "hunt"
-                    }
-
-                    # print(blnk)
-
-                    # debug_point(blnk["p"].asTuple(), (0, 200, 0), dir_tag)
-
-                    # check for over shooting
-                    # vec1 = blnk["a"] - blnk["b"]
-                    # vec2 = blnk["p"] - blnk["a"]
-                    # node2Target = vec1.magnitudeSquared()
-                    # node2Self = vec2.magnitudeSquared()
-                    # time_to_target = blnk["p"].distanceTo(blnk["b"])/blinky.speed
-
-                    remaining_move_time = next_option.delta
-                    time_to_target = blnk["p"].distanceTo(blnk["b"]) / blnk["s"]
-                    part_count = 0
-                    colors = [RED, GREEN, TEAL, WHITE]
-                    while time_to_target < remaining_move_time:
-                        # this
-                        blinky_next_point = blnk["p"] + (blnk["d"] * blnk["s"] * time_to_target)
-                        debug_line(blnk["a"].asTuple(), blinky_next_point.asTuple(), colors[part_count], tag=dir_tag)
-                        part_count = (part_count+1)%4
-
-                        # predict next
-                        remaining_move_time -= time_to_target
-                        best_direction = None
-                        best_neigh = None
-                        best_h = 100000000
-                        # print(next_option.delta-remaining_move_time)
-                        # wrong
-                        goal = self.node.position + (blinky.directions[dir] * (next_option.delta-remaining_move_time) * self.speed)
-                        debug_point(goal.asTuple(), colors[part_count], tag=dir_tag)
-                        for next_direction in [UP, DOWN, LEFT, RIGHT]:
-                            neigh = blnk["bn"].neighbors[next_direction]
-                            if next_direction != blnk["dn"] * -1 and neigh is not None and BLINKY in blnk["bn"].access[next_direction]:
-                                h = (neigh.position - goal).magnitudeSquared()
-                                # debug_line(goal.asTuple(), neigh.position.asTuple(), colors[part_count], tag=dir_tag)
-                                if h < best_h:
-                                    best_h = h
-                                    best_direction = next_direction
-                                    best_neigh = neigh
-
-                        blnk["p"] = blnk["b"]
-                        blnk["a"] = blnk["b"]
-                        blnk["bn"] = best_neigh
-                        blnk["b"] = best_neigh.position
-                        blnk["dn"] = best_direction
-                        blnk["d"] = blinky.directions[best_direction]
-                        time_to_target = blnk["p"].distanceTo(blnk["b"]) / blnk["s"]
-                    # last
-                    blinky_next_point = blnk["p"] + (blnk["d"] * blnk["s"] * remaining_move_time)
-                    debug_line(blnk["a"].asTuple(), blinky_next_point.asTuple(), colors[part_count], tag=dir_tag)
-                    part_count = (part_count+1)%4
-                        # print("k")
-                        #     print(blnk["bn"])
-                        #     if blnk["bn"].neighbors[next_direction] is not None:
-                        #         print(next_direction)
-                                # if key != self.direction * -1 or direction is not STOP or self.name in self.node.access[direction]
-                        # blnk["d"] = blnk["d"] #to change
-                        # blnk["b"] = 0
-                        # time_to_target = blnk["p"].distanceTo(blnk["b"]) / blnk["s"]
-
-                    # print(time_to_target, next_option.delta, time_to_target<next_option.delta)
-                    # time_diff = next_option.delta - time_to_target
-                    # if time_diff<0:
-                    #     print("done")
-                    # else:
-                    #     blnk["a"] = blnk["b"]
-                        # directions = blinky.validDirections()
-                        # direction = self.directionMethod(directions)
-                        # if not self.disablePortal:
-                        #     if self.node.neighbors[PORTAL] is not None:
-                        #         self.node = self.node.neighbors[PORTAL]
-                        # self.target = self.getNewTarget(direction)
-                        # if self.target is not self.node:
-                        #     self.direction = direction
-                        # else:
-                        #     self.target = self.getNewTarget(self.direction)
-                        #
-                        # self.setPosition()
-
-
-
-                    # second check
-                    # if(node2Self >= node2Target):
-                    # option.options.append(next_option)
-
-            # print(self.ghosts)
-            # print(self.ghosts.blinky.)
-            direction = self.getValidKey()
-
-            # clear other
-            for dd in self.directions:
-                if dd != direction:
-                    debug_clear(dd)
-
-            self.target = self.getNewTarget(direction)
-
-            if self.target is not self.node:
-                self.direction = direction
-            else:
-                self.target = self.getNewTarget(self.direction)
-
-            if self.target is self.node:
-                self.direction = STOP
-            self.setPosition()
-        else:
-            # print("elsewhere")
-            direction = self.getValidKey()
-            if self.oppositeDirection(direction):
-                self.reverseDirection()
-
     def getValidKey(self):
         key_pressed = pygame.key.get_pressed()
         if key_pressed[K_UP]:
@@ -200,14 +42,14 @@ class Pacman(Entity):
             return LEFT
         if key_pressed[K_RIGHT]:
             return RIGHT
-        return STOP  
+        return STOP
 
     def eatPellets(self, pelletList):
         for pellet in pelletList:
             if self.collideCheck(pellet):
                 return pellet
-        return None    
-    
+        return None
+
     def collideGhost(self, ghost):
         return self.collideCheck(ghost)
 
@@ -218,3 +60,138 @@ class Pacman(Entity):
         if dSquared <= rSquared:
             return True
         return False
+
+    def update(self, dt):
+        self.sprites.update(dt)
+        self.position += self.directions[self.direction]*self.speed*dt
+
+        if self.overshotTarget():
+            # PAC-MAN AT CROSS ROAD
+            self.node = self.target
+            debug_clear(self.direction)
+
+            # PORTALS
+            if self.node.neighbors[PORTAL] is not None:
+                self.node = self.node.neighbors[PORTAL]
+
+            init_gs = GameState()
+
+            # pacman state
+            init_gs.pacman_s = self.speed
+            init_gs.pacman_node = self.node
+
+            # blinky state
+            init_gs.blinky_a = self.ghosts.blinky.node.position
+            init_gs.blinky_b = self.ghosts.blinky.target.position
+            init_gs.blinky_bn = self.ghosts.blinky.target
+            init_gs.blinky_p = self.ghosts.blinky.position
+            init_gs.blinky_s = self.ghosts.blinky.speed
+            init_gs.blinky_dv = DIR2VEC[self.ghosts.blinky.direction]
+            init_gs.blinky_d = self.ghosts.blinky.direction
+
+            # init_gs -->
+            next_options = []
+            predict(init_gs, next_options)
+
+            print(next_options)
+
+
+
+            # finally, set the direction
+            direction = self.getValidKey()
+
+            # set new target_node
+            self.target = self.getNewTarget(direction)
+            if self.target is not self.node:
+                self.direction = direction
+            else:
+                self.target = self.getNewTarget(self.direction)
+
+            if self.target is self.node:
+                self.direction = STOP
+            self.setPosition()
+
+            # clear other tags
+            for dd in self.directions:
+                if dd != self.direction:
+                    debug_clear(dd)
+        else:
+            # PAC-MAN BETWEEN CROSSROADS
+            direction = self.getValidKey()
+            if self.oppositeDirection(direction):
+                self.reverseDirection()
+
+
+def predict(init_gs, next_options):
+    for dir in init_gs.pacman_node.neighbors:
+        target_node = init_gs.pacman_node.neighbors[dir]
+        if target_node is not None:
+            # (debug) draw purple dot and line
+            dir_tag = dir
+            debug_point(target_node.position.asTuple(), (200, 0, 200), dir_tag)
+            debug_line(target_node.position.asTuple(), init_gs.pacman_node.position.asTuple(),
+                       (200, 0, 200), dir_tag)
+
+            # create new game_state
+            gs = GameState()
+
+            # blinky clone
+            gs.blinky_a = init_gs.blinky_a
+            gs.blinky_b = init_gs.blinky_b
+            gs.blinky_bn = init_gs.blinky_bn
+            gs.blinky_p = init_gs.blinky_p
+            gs.blinky_s = init_gs.blinky_s
+            gs.blinky_d = init_gs.blinky_dv
+            gs.blinky_dn = init_gs.blinky_d
+
+            distance = init_gs.pacman_node.position.distanceTo(target_node.position)
+            delta = distance / init_gs.pacman_s
+            remaining_move_time = delta
+            time_to_target = gs.blinky_p.distanceTo(gs.blinky_b) / gs.blinky_s
+            segment_num = 0
+
+            while time_to_target < remaining_move_time:
+                # blinky first segment
+                blinky_next_point = gs.blinky_p + (gs.blinky_d * gs.blinky_s * time_to_target)
+                debug_line(gs.blinky_a.asTuple(), blinky_next_point.asTuple(), LINE_COLORS[segment_num],
+                           tag=dir_tag)
+                segment_num = (segment_num + 1) % 4
+
+                # predict next direction
+                remaining_move_time -= time_to_target
+                best_direction = None
+                best_neigh = None
+                best_h = 100000000
+                goal = init_gs.pacman_node.position + (
+                            DIR2VEC[dir] * (delta - remaining_move_time) * init_gs.pacman_s)
+                debug_point(goal.asTuple(), LINE_COLORS[segment_num], tag=dir_tag)
+                for next_direction in [UP, DOWN, LEFT, RIGHT]:
+                    neigh = gs.blinky_bn.neighbors[next_direction]
+                    if next_direction != gs.blinky_dn * -1 and neigh is not None and BLINKY in \
+                            gs.blinky_bn.access[next_direction]:
+                        h = (neigh.position - goal).magnitudeSquared()
+                        # debug_line(goal.asTuple(), neigh.position.asTuple(), LINE_COLORS[segment_num], tag=dir_tag)
+                        if h < best_h:
+                            best_h = h
+                            best_direction = next_direction
+                            best_neigh = neigh
+
+                # move blinky
+                gs.blinky_p = gs.blinky_b
+                gs.blinky_a = gs.blinky_b
+                gs.blinky_bn = best_neigh
+                gs.blinky_b = best_neigh.position
+                gs.blinky_dn = best_direction
+                gs.blinky_d = DIR2VEC[best_direction]
+                time_to_target = gs.blinky_p.distanceTo(gs.blinky_b) / gs.blinky_s
+
+            # blinky last segment
+            blinky_next_point = gs.blinky_p + (gs.blinky_d * gs.blinky_s * remaining_move_time)
+            debug_line(gs.blinky_a.asTuple(), blinky_next_point.asTuple(), LINE_COLORS[segment_num],
+                       tag=dir_tag)
+
+            # move pacman
+            gs.pacman_s = init_gs.pacman_s
+            gs.pacman_node = target_node
+
+            next_options.append(gs)

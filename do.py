@@ -10,3 +10,7 @@ class DynamicObject:
 
     def __setattr__(self, name, value):
         self.__dict__[name] = value
+
+class GameState:
+    def __init__(self):
+        self.next = None
