@@ -38,7 +38,11 @@ class Pacman(Entity):
         if self.overshotTarget():
             # print("decision point")
             # clear debug
-            debug_clear('up')
+            debug_clear(1)
+            debug_clear(-1)
+            debug_clear(2)
+            debug_clear(-2)
+            debug_clear(0)
 
             self.node = self.target
             if self.node.neighbors[PORTAL] is not None:
@@ -47,18 +51,19 @@ class Pacman(Entity):
             option = DynamicObject()
             option.xy = self.target.position.asTuple()
             option.options = []
-            dc = 0
+            # dc = 0
             for dir in self.node.neighbors:
-                dc+=1
-                if dc==2:
-                    break
+                dir_tag = dir
+                # dc+=1
+                # if dc==2:
+                #     break
                 # if dir == -1 * self.direction:
                 #     continue
                 node = self.node.neighbors[dir]
                 if node is not None:
                     # next option
-                    debug_point(node.position.asTuple(), (200, 0, 200), "cross")
-                    debug_line(node.position.asTuple(), option.xy, (200, 0, 200), "cross")
+                    debug_point(node.position.asTuple(), (200, 0, 200), dir_tag)
+                    debug_line(node.position.asTuple(), option.xy, (200, 0, 200), dir_tag)
 
                     next_option = DynamicObject()
                     next_option.xy = node.position.asTuple()
@@ -81,7 +86,7 @@ class Pacman(Entity):
 
                     # print(blnk)
 
-                    # debug_point(blnk["p"].asTuple(), (0, 200, 0), "cross")
+                    # debug_point(blnk["p"].asTuple(), (0, 200, 0), dir_tag)
 
                     # check for over shooting
                     # vec1 = blnk["a"] - blnk["b"]
@@ -97,7 +102,7 @@ class Pacman(Entity):
                     while time_to_target < remaining_move_time:
                         # this
                         blinky_next_point = blnk["p"] + (blnk["d"] * blnk["s"] * time_to_target)
-                        debug_line(blnk["a"].asTuple(), blinky_next_point.asTuple(), colors[part_count], tag="cross")
+                        debug_line(blnk["a"].asTuple(), blinky_next_point.asTuple(), colors[part_count], tag=dir_tag)
                         part_count = (part_count+1)%4
 
                         # predict next
@@ -105,19 +110,20 @@ class Pacman(Entity):
                         best_direction = None
                         best_neigh = None
                         best_h = 100000000
-                        print(next_option.delta-remaining_move_time)
+                        # print(next_option.delta-remaining_move_time)
                         # wrong
                         goal = self.node.position + (blinky.directions[dir] * (next_option.delta-remaining_move_time) * self.speed)
-                        debug_point(goal.asTuple(), colors[part_count], tag="cross")
+                        debug_point(goal.asTuple(), colors[part_count], tag=dir_tag)
                         for next_direction in [UP, DOWN, LEFT, RIGHT]:
                             neigh = blnk["bn"].neighbors[next_direction]
-                            if next_direction != blnk["dn"] * -1 and neigh is not None and neigh.access[next_direction]:
-                                vec = (blnk["p"] - goal)
-                                h = vec.magnitudeSquared()
-                                if h<best_h:
+                            if next_direction != blnk["dn"] * -1 and neigh is not None and BLINKY in blnk["bn"].access[next_direction]:
+                                h = (neigh.position - goal).magnitudeSquared()
+                                # debug_line(goal.asTuple(), neigh.position.asTuple(), colors[part_count], tag=dir_tag)
+                                if h < best_h:
                                     best_h = h
                                     best_direction = next_direction
                                     best_neigh = neigh
+
                         blnk["p"] = blnk["b"]
                         blnk["a"] = blnk["b"]
                         blnk["bn"] = best_neigh
@@ -127,7 +133,7 @@ class Pacman(Entity):
                         time_to_target = blnk["p"].distanceTo(blnk["b"]) / blnk["s"]
                     # last
                     blinky_next_point = blnk["p"] + (blnk["d"] * blnk["s"] * remaining_move_time)
-                    debug_line(blnk["a"].asTuple(), blinky_next_point.asTuple(), colors[part_count], tag="cross")
+                    debug_line(blnk["a"].asTuple(), blinky_next_point.asTuple(), colors[part_count], tag=dir_tag)
                     part_count = (part_count+1)%4
                         # print("k")
                         #     print(blnk["bn"])
@@ -166,6 +172,12 @@ class Pacman(Entity):
             # print(self.ghosts)
             # print(self.ghosts.blinky.)
             direction = self.getValidKey()
+
+            # clear other
+            for dd in self.directions:
+                if dd != direction:
+                    debug_clear(dd)
+
             self.target = self.getNewTarget(direction)
 
             if self.target is not self.node:

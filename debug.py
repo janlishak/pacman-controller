@@ -17,7 +17,7 @@ def debug_points():
 
 def debug_clear(tag):
     if(points.get(tag) == None):
-        print("wtf")
+        # print("wtf")
         return
 
     points[tag]=[]
