@@ -100,7 +100,7 @@ class Pacman(Entity):
             predict(init_gs, options)
             # print(len(options))
 
-            for level in range(2):
+            for level in range(1):
                 leafs = []
                 for option in options:
                     predict(option, leafs)
@@ -121,9 +121,13 @@ class Pacman(Entity):
             # print(best_option.dir_tag)
             keepTags = [best_option.dir_tag]
             current = best_option
+            print("turn:")
+            print(best_option)
             while current.level > 1:
                 current = current.parent
                 keepTags.append(current.dir_tag)
+                print(current)
+
 
             # print(current, keepTags)
 
@@ -142,7 +146,8 @@ class Pacman(Entity):
             remove_debug(init_gs, True)
             # print()
 
-            debug_point((432,272), (92,242,53), "df")
+            # debug_point((16,64), (92,242,53), "df")
+
 
             # CHOOSE
             direction = current.dir
@@ -225,6 +230,19 @@ def predict(init_gs, next_options):
                             best_h = h
                             best_direction = next_direction
                             best_neigh = neigh
+                if not best_direction:
+                    print("No blinky direction found")
+                    print("this is a bug")
+                    for next_direction in [UP, DOWN, LEFT, RIGHT]:
+                        neigh = gs.blinky_bn.neighbors[next_direction]
+                        if next_direction != gs.blinky_d * -1 and neigh is not None and PACMAN in \
+                                gs.blinky_bn.access[next_direction]:
+                            h = (neigh.position - goal).magnitudeSquared()
+                            # debug_line(goal.asTuple(), neigh.position.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
+                            if h < best_h:
+                                best_h = h
+                                best_direction = next_direction
+                                best_neigh = neigh
 
                 # check for collision
                 if gs.blinky_b == target_node.position:
@@ -244,10 +262,6 @@ def predict(init_gs, next_options):
                     if dSquared <= rSquared:
                         gs.score -= 1000
 
-
-                if best_neigh is None:
-                    print("hey")
-                    print("ghost fucked")
                 # move blinky
                 gs.blinky_p = gs.blinky_b
                 gs.blinky_a = gs.blinky_b
