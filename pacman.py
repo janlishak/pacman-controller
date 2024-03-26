@@ -84,7 +84,6 @@ class Pacman(Entity):
 
             # blinky state
             init_gs.blinky_a = self.ghosts.blinky.node.position
-            init_gs.blinky_an = self.ghosts.blinky.node
             init_gs.blinky_b = self.ghosts.blinky.target.position
             init_gs.blinky_bn = self.ghosts.blinky.target
             init_gs.blinky_p = self.ghosts.blinky.position
@@ -143,6 +142,8 @@ class Pacman(Entity):
             remove_debug(init_gs, True)
             # print()
 
+            debug_point((432,272), (92,242,53), "df")
+
             # CHOOSE
             direction = current.dir
             self.visited = current.visited
@@ -178,13 +179,11 @@ def predict(init_gs, next_options):
             gs.dir_tag = str(gs.level) + "#" + str(target_node.position.x//TILEWIDTH) + ":" + str(target_node.position.y//TILEWIDTH)
 
 
-            # add as child
-            init_gs.child.append(gs)
             gs.parent = init_gs
+            gs.score = init_gs.score
 
             # blinky clone
             gs.blinky_a = init_gs.blinky_a
-            gs.blinky_an = init_gs.blinky_an
             gs.blinky_b = init_gs.blinky_b
             gs.blinky_bn = init_gs.blinky_bn
             gs.blinky_p = init_gs.blinky_p
@@ -227,10 +226,31 @@ def predict(init_gs, next_options):
                             best_direction = next_direction
                             best_neigh = neigh
 
+                # check for collision
+                if gs.blinky_b == target_node.position:
+                    if best_direction == dir * -1:
+                        gs.score -= 1000
+                    else:
+                        d = goal - gs.blinky_b
+                        dSquared = d.magnitudeSquared()
+                        rSquared = (5 + 5) ** 2
+                        if dSquared <= rSquared:
+                            gs.score -= 1000
+
+                if gs.blinky_b == init_gs.pacman_node.position:
+                    d = goal - gs.blinky_b
+                    dSquared = d.magnitudeSquared()
+                    rSquared = (5 + 5) ** 2
+                    if dSquared <= rSquared:
+                        gs.score -= 1000
+
+
+                if best_neigh is None:
+                    print("hey")
+                    print("ghost fucked")
                 # move blinky
                 gs.blinky_p = gs.blinky_b
                 gs.blinky_a = gs.blinky_b
-                gs.blinky_an = gs.blinky_bn
                 gs.blinky_bn = best_neigh
                 gs.blinky_b = best_neigh.position
                 gs.blinky_d = best_direction
@@ -251,7 +271,6 @@ def predict(init_gs, next_options):
             A = init_gs.pacman_node.position.asTuple()
             B = target_node.position.asTuple()
 
-            gs.score = init_gs.score
             gs.visited = init_gs.visited.clone()
             if not gs.visited.check(A, B):
                 gs.score += 10
@@ -259,3 +278,6 @@ def predict(init_gs, next_options):
 
             # add to the list of options
             next_options.append(gs)
+
+            # add as child
+            init_gs.child.append(gs)
