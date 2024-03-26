@@ -1,3 +1,6 @@
+from constants import BLINKY, PINKY, INKY, CLYDE
+
+
 class DynamicObject:
     def __init__(self):
         pass
@@ -11,6 +14,16 @@ class DynamicObject:
     def __setattr__(self, name, value):
         self.__dict__[name] = value
 
+
+class GhostState:
+    def __init__(self):
+        self.a = None
+        self.b = None
+        self.bn = None
+        self.p = None
+        self.s = None
+        self.dv = None
+        self.d = None
 class GameState:
     def __init__(self):
         # state
@@ -32,6 +45,9 @@ class GameState:
         self.blinky_s = None
         self.blinky_dv = None
         self.blinky_d = None
+
+        # new ghosts
+        self.g = {BLINKY: GhostState(), PINKY: GhostState(), INKY: GhostState(), CLYDE: GhostState()}
 
         # score
         self.score = None

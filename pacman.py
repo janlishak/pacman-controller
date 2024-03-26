@@ -84,13 +84,13 @@ class Pacman(Entity):
             init_gs.dir = self.direction
 
             # blinky state
-            init_gs.blinky_a = self.ghosts.blinky.node.position
-            init_gs.blinky_b = self.ghosts.blinky.target.position
-            init_gs.blinky_bn = self.ghosts.blinky.target
-            init_gs.blinky_p = self.ghosts.blinky.position
-            init_gs.blinky_s = self.ghosts.blinky.speed
-            init_gs.blinky_d = self.ghosts.blinky.direction
-            init_gs.blinky_dv = DIR2VEC[self.ghosts.blinky.direction]
+            init_gs.g[BLINKY].a = self.ghosts.blinky.node.position
+            init_gs.g[BLINKY].b = self.ghosts.blinky.target.position
+            init_gs.g[BLINKY].bn = self.ghosts.blinky.target
+            init_gs.g[BLINKY].p = self.ghosts.blinky.position
+            init_gs.g[BLINKY].s = self.ghosts.blinky.speed
+            init_gs.g[BLINKY].d = self.ghosts.blinky.direction
+            init_gs.g[BLINKY].dv = DIR2VEC[self.ghosts.blinky.direction]
 
             # score
             init_gs.visited = self.visited
@@ -101,7 +101,7 @@ class Pacman(Entity):
             predict(init_gs, options)
             # print(len(options))
 
-            for level in range(3):
+            for level in range(1):
                 leafs = []
                 for option in options:
                     predict(option, leafs)
@@ -179,110 +179,114 @@ def predict(init_gs, next_options):
         target_node = init_gs.pacman_node.neighbors[dir]
         if target_node is not None and PACMAN in init_gs.pacman_node.access[dir] and init_gs.dir * -1 is not dir:
 
-
             # create new game_state
             gs = GameState()
             gs.level = init_gs.level + 1
             gs.dir = dir
-            # gs.dir_tag = str(gs.level) + ":" + str(dir)
             gs.dir_tag = str(gs.level) + "#" + str(target_node.position.x//TILEWIDTH) + ":" + str(target_node.position.y//TILEWIDTH)
-
-
             gs.parent = init_gs
             gs.score = init_gs.score
 
-            # blinky clone
-            gs.blinky_a = init_gs.blinky_a
-            gs.blinky_b = init_gs.blinky_b
-            gs.blinky_bn = init_gs.blinky_bn
-            gs.blinky_p = init_gs.blinky_p
-            gs.blinky_s = init_gs.blinky_s
-            gs.blinky_d = init_gs.blinky_d
-            gs.blinky_dv = init_gs.blinky_dv
-
-            # check for obvious collision
-            if target_node.position == gs.blinky_a and gs.blinky_d == dir * -1:
-                continue
-
+            # state reusable
             distance = init_gs.pacman_node.position.distanceTo(target_node.position)
             delta = distance / init_gs.pacman_s
-            remaining_move_time = delta
-            time_to_target = gs.blinky_p.distanceTo(gs.blinky_b) / gs.blinky_s
-            segment_num = 0
 
-            # (debug) draw purple dot and line
-            debug_point(target_node.position.asTuple(), (200, 0, 200), gs.dir_tag)
-            debug_line(target_node.position.asTuple(), init_gs.pacman_node.position.asTuple(), (200, 0, 200), gs.dir_tag)
+            ##### ##### ##### GHOST n STUFF ##### ##### #####
+            for ghost in [BLINKY]:
 
-            while time_to_target < remaining_move_time:
-                # blinky first segment
-                blinky_next_point = gs.blinky_p + (gs.blinky_dv * gs.blinky_s * time_to_target)
-                debug_line(gs.blinky_a.asTuple(), blinky_next_point.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
-                segment_num = (segment_num + 1) % 4
-
-                # predict next direction
-                remaining_move_time -= time_to_target
-                best_direction = None
-                best_neigh = None
-                best_h = 100000000
-                goal = init_gs.pacman_node.position + (DIR2VEC[dir] * (delta - remaining_move_time) * init_gs.pacman_s)
-                # debug_point(goal.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
-                for next_direction in [UP, DOWN, LEFT, RIGHT]:
-                    neigh = gs.blinky_bn.neighbors[next_direction]
-                    if next_direction != gs.blinky_d * -1 and neigh is not None and BLINKY in \
-                            gs.blinky_bn.access[next_direction]:
-                        h = (neigh.position - goal).magnitudeSquared()
-                        # debug_line(goal.asTuple(), neigh.position.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
-                        if h < best_h:
-                            best_h = h
-                            best_direction = next_direction
-                            best_neigh = neigh
-                if not best_direction:
-                    print("No blinky direction found")
-                    print("this is a bug")
+                # ghost clone
+                gs.g[ghost].a = init_gs.g[ghost].a
+                gs.g[ghost].b = init_gs.g[ghost].b
+                gs.g[ghost].bn = init_gs.g[ghost].bn
+                gs.g[ghost].p = init_gs.g[ghost].p
+                gs.g[ghost].s = init_gs.g[ghost].s
+                gs.g[ghost].d = init_gs.g[ghost].d
+                gs.g[ghost].dv = init_gs.g[ghost].dv
+    
+                # check for obvious collision
+                if target_node.position == gs.g[ghost].a and gs.g[ghost].d == dir * -1:
+                    continue
+    
+    
+                remaining_move_time = delta
+                time_to_target = gs.g[ghost].p.distanceTo(gs.g[ghost].b) / gs.g[ghost].s
+                segment_num = 0
+    
+                # (debug) draw purple dot and line
+                debug_point(target_node.position.asTuple(), (200, 0, 200), gs.dir_tag)
+                debug_line(target_node.position.asTuple(), init_gs.pacman_node.position.asTuple(), (200, 0, 200), gs.dir_tag)
+    
+                while time_to_target < remaining_move_time:
+                    # ghost first segment
+                    ghost_next_point = gs.g[ghost].p + (gs.g[ghost].dv * gs.g[ghost].s * time_to_target)
+                    debug_line(gs.g[ghost].a.asTuple(), ghost_next_point.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
+                    segment_num = (segment_num + 1) % 4
+    
+                    # predict next direction
+                    remaining_move_time -= time_to_target
+                    best_direction = None
+                    best_neigh = None
+                    best_h = 100000000
+                    goal = init_gs.pacman_node.position + (DIR2VEC[dir] * (delta - remaining_move_time) * init_gs.pacman_s)
+                    # debug_point(goal.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
                     for next_direction in [UP, DOWN, LEFT, RIGHT]:
-                        neigh = gs.blinky_bn.neighbors[next_direction]
-                        if next_direction != gs.blinky_d * -1 and neigh is not None and PACMAN in \
-                                gs.blinky_bn.access[next_direction]:
+                        neigh = gs.g[ghost].bn.neighbors[next_direction]
+                        if next_direction != gs.g[ghost].d * -1 and neigh is not None and ghost in \
+                                gs.g[ghost].bn.access[next_direction]:
                             h = (neigh.position - goal).magnitudeSquared()
                             # debug_line(goal.asTuple(), neigh.position.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
                             if h < best_h:
                                 best_h = h
                                 best_direction = next_direction
                                 best_neigh = neigh
-
-                # check for collision
-                if gs.blinky_b == target_node.position:
-                    if best_direction == dir * -1:
-                        gs.score -= 1000
-                    else:
-                        d = goal - gs.blinky_b
+                    if not best_direction:
+                        print("No ghost direction found")
+                        print("this is a bug")
+                        for next_direction in [UP, DOWN, LEFT, RIGHT]:
+                            neigh = gs.g[ghost].bn.neighbors[next_direction]
+                            if next_direction != gs.g[ghost].d * -1 and neigh is not None and PACMAN in \
+                                    gs.g[ghost].bn.access[next_direction]:
+                                h = (neigh.position - goal).magnitudeSquared()
+                                # debug_line(goal.asTuple(), neigh.position.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
+                                if h < best_h:
+                                    best_h = h
+                                    best_direction = next_direction
+                                    best_neigh = neigh
+    
+                    # check for collision
+                    if gs.g[ghost].b == target_node.position:
+                        if best_direction == dir * -1:
+                            gs.score -= 1000
+                        else:
+                            d = goal - gs.g[ghost].b
+                            dSquared = d.magnitudeSquared()
+                            rSquared = (5 + 5) ** 2
+                            if dSquared <= rSquared:
+                                gs.score -= 1000
+    
+                    if gs.g[ghost].b == init_gs.pacman_node.position:
+                        d = goal - gs.g[ghost].b
                         dSquared = d.magnitudeSquared()
                         rSquared = (5 + 5) ** 2
                         if dSquared <= rSquared:
                             gs.score -= 1000
+    
+                    # move ghost
+                    gs.g[ghost].p = gs.g[ghost].b
+                    gs.g[ghost].a = gs.g[ghost].b
+                    gs.g[ghost].bn = best_neigh
+                    gs.g[ghost].b = best_neigh.position
+                    gs.g[ghost].d = best_direction
+                    gs.g[ghost].dv = DIR2VEC[best_direction]
+                    time_to_target = gs.g[ghost].p.distanceTo(gs.g[ghost].b) / gs.g[ghost].s
+    
+                # ghost last segment
+                ghost_next_point = gs.g[ghost].p + (gs.g[ghost].dv * gs.g[ghost].s * remaining_move_time)
+                gs.g[ghost].p = ghost_next_point
+                debug_line(gs.g[ghost].a.asTuple(), ghost_next_point.asTuple(), LINE_COLORS[segment_num],
+                           tag=gs.dir_tag)
 
-                if gs.blinky_b == init_gs.pacman_node.position:
-                    d = goal - gs.blinky_b
-                    dSquared = d.magnitudeSquared()
-                    rSquared = (5 + 5) ** 2
-                    if dSquared <= rSquared:
-                        gs.score -= 1000
-
-                # move blinky
-                gs.blinky_p = gs.blinky_b
-                gs.blinky_a = gs.blinky_b
-                gs.blinky_bn = best_neigh
-                gs.blinky_b = best_neigh.position
-                gs.blinky_d = best_direction
-                gs.blinky_dv = DIR2VEC[best_direction]
-                time_to_target = gs.blinky_p.distanceTo(gs.blinky_b) / gs.blinky_s
-
-            # blinky last segment
-            blinky_next_point = gs.blinky_p + (gs.blinky_dv * gs.blinky_s * remaining_move_time)
-            gs.blinky_p = blinky_next_point
-            debug_line(gs.blinky_a.asTuple(), blinky_next_point.asTuple(), LINE_COLORS[segment_num],
-                       tag=gs.dir_tag)
+            ##### ##### ##### GHOST n STUFF ##### ##### #####
 
             # move pacman
             gs.pacman_s = init_gs.pacman_s
