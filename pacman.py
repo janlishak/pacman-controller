@@ -2,7 +2,7 @@ import pygame
 from pygame.locals import *
 
 from debug import debug_point, debug_clear, debug_line, debug_clear_all
-from do import DynamicObject, GameState
+from do import DynamicObject, GameState, SymmetricHashMap
 from vector import Vector2
 from constants import *
 from entity import Entity
@@ -19,6 +19,7 @@ class Pacman(Entity):
         self.alive = True
         self.sprites = PacmanSprites(self)
         self.ghosts = None
+        self.visited = SymmetricHashMap()
 
     def reset(self):
         Entity.reset(self)
@@ -70,7 +71,6 @@ class Pacman(Entity):
             self.node = self.target
             debug_clear_all()
 
-
             # PORTALS
             if self.node.neighbors[PORTAL] is not None:
                 self.node = self.node.neighbors[PORTAL]
@@ -91,6 +91,10 @@ class Pacman(Entity):
             init_gs.blinky_d = self.ghosts.blinky.direction
             init_gs.blinky_dv = DIR2VEC[self.ghosts.blinky.direction]
 
+            # score
+            init_gs.visited = self.visited
+            init_gs.score = 0
+
             # MAKE PREDICTIONS
             options = []
             predict(init_gs, options)
@@ -106,10 +110,15 @@ class Pacman(Entity):
                     debug_clear("1:" + str(option.dir))
                 else:
                     choice = option
+                    self.visited = choice.visited
 
             # DRAW FUTURE PREDICTIONS
-            # if choice != None:
-            #     predict(choice, options)
+            if choice != None:
+                predict(choice, options)
+
+            for option in options:
+                print(option, end=" ")
+            print()
 
 
             # set new target_node
@@ -134,7 +143,7 @@ class Pacman(Entity):
 def predict(init_gs, next_options):
     for dir in init_gs.pacman_node.neighbors:
         target_node = init_gs.pacman_node.neighbors[dir]
-        if target_node is not None:
+        if target_node is not None and PACMAN in init_gs.pacman_node.access[dir]:
             # create new game_state
             gs = GameState()
             gs.level = init_gs.level + 1
@@ -200,6 +209,7 @@ def predict(init_gs, next_options):
 
             # blinky last segment
             blinky_next_point = gs.blinky_p + (gs.blinky_dv * gs.blinky_s * remaining_move_time)
+            gs.blinky_p = blinky_next_point
             debug_line(gs.blinky_a.asTuple(), blinky_next_point.asTuple(), LINE_COLORS[segment_num],
                        tag=gs.dir_tag)
 
@@ -207,4 +217,15 @@ def predict(init_gs, next_options):
             gs.pacman_s = init_gs.pacman_s
             gs.pacman_node = target_node
 
+            # rate the choice
+            A = init_gs.pacman_node.position.asTuple()
+            B = target_node.position.asTuple()
+
+            gs.score = init_gs.score
+            gs.visited = init_gs.visited.clone()
+            if not gs.visited.check(A, B):
+                gs.score += 10
+                gs.visited.visit(A, B)
+
+            # add to the list of options
             next_options.append(gs)

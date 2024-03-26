@@ -33,5 +33,30 @@ class GameState:
         self.blinky_dv = None
         self.blinky_d = None
 
+        # score
+        self.score = None
+        self.visited = None
+
     def __str__(self):
-        return f"Level: {self.level}, Direction: {self.dir}"
+        return f"Level: {self.level}, Direction: {self.dir}, Score: {self.score}"
+
+
+class SymmetricHashMap:
+    def __init__(self):
+        self.map = {}
+
+    def normalize_key(self, vertex_a, vertex_b):
+        return tuple(sorted((vertex_a, vertex_b)))
+
+    def visit(self, vertex_a, vertex_b):
+        key = self.normalize_key(vertex_a, vertex_b)
+        self.map[key] = True
+
+    def check(self, vertex_a, vertex_b):
+        key = self.normalize_key(vertex_a, vertex_b)
+        return self.map.get(key, False)
+
+    def clone(self):
+        copy_map = SymmetricHashMap()
+        copy_map.map = self.map.copy()
+        return copy_map
