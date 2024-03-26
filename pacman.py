@@ -98,28 +98,47 @@ class Pacman(Entity):
             # MAKE PREDICTIONS
             options = []
             predict(init_gs, options)
+            print(len(options))
+
+            for level in range(1):
+                leafs = []
+                for option in options:
+                    predict(option, leafs)
+                options = leafs
+
+            print(len(options))
+
+            # find the best
+            best_option = options[-1]
+            index = len(options) - 1
+            while index >= 0:
+                if best_option.score < options[index].score:
+                    best_option = options[index]
+                index -= 1
+
+            # back track
+            print(best_option.dir_tag)
+            keepTags = [best_option.dir_tag]
+            current = best_option
+            while current.level > 1:
+                current = current.parent
+                keepTags.append(current.dir_tag)
+
+            print(current, keepTags)
+            # remove debug by tag
+            def remove_debug(gs):
+                debug_clear(gs.dir_tag)
+                # print(gs.dir_tag, end=" ")
+                if gs.child is not None:
+                    for child in gs.child:
+                        if child.dir_tag not in keepTags:
+                            remove_debug(child)
+            remove_debug(init_gs)
+            # print()
 
             # CHOOSE
-            direction = self.getValidKey()
-            if direction == STOP:
-                direction = self.direction
-
-            choice = None
-            for option in init_gs.child:
-                if option.dir != direction:
-                    debug_clear("1:" + str(option.dir))
-                else:
-                    choice = option
-                    self.visited = choice.visited
-
-            # DRAW FUTURE PREDICTIONS
-            if choice != None:
-                predict(choice, options)
-
-            for option in options:
-                print(option, end=" ")
-            print()
-
+            direction = current.dir
+            self.visited = current.visited
 
             # set new target_node
             self.target = self.getNewTarget(direction)
@@ -148,7 +167,9 @@ def predict(init_gs, next_options):
             gs = GameState()
             gs.level = init_gs.level + 1
             gs.dir = dir
-            gs.dir_tag = str(gs.level) + ":" + str(dir)
+            # gs.dir_tag = str(gs.level) + ":" + str(dir)
+            gs.dir_tag = str(gs.level) + "#" + str(target_node.position.x//TILEWIDTH) + ":" + str(target_node.position.y//TILEWIDTH)
+
 
             # add as child
             init_gs.child.append(gs)
@@ -186,7 +207,7 @@ def predict(init_gs, next_options):
                 best_h = 100000000
                 goal = init_gs.pacman_node.position + (
                             DIR2VEC[dir] * (delta - remaining_move_time) * init_gs.pacman_s)
-                debug_point(goal.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
+                # debug_point(goal.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
                 for next_direction in [UP, DOWN, LEFT, RIGHT]:
                     neigh = gs.blinky_bn.neighbors[next_direction]
                     if next_direction != gs.blinky_d * -1 and neigh is not None and BLINKY in \

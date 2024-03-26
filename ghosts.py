@@ -131,6 +131,7 @@ class GhostGroup(object):
         self.inky = Inky(node, pacman, self.blinky)
         self.clyde = Clyde(node, pacman)
         self.ghosts = [self.blinky]
+        # self.ghosts = [self.blinky]
         #not all ghosts
 
     def __iter__(self):

@@ -29,7 +29,7 @@ def debug_use_color():
     return False
 
 def debug_get_speed():
-    return 1
+    return 0.1
 
 def debug_get_fps():
     return 60

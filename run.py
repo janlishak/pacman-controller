@@ -1,6 +1,8 @@
 import pygame
 import os
 from pygame.locals import *
+
+import debug
 from constants import *
 from debug import debug_points, debug_clear, debug_point, debug_get_fps
 from pacman import Pacman
@@ -247,6 +249,7 @@ class GameController(object):
 
         # debug points
         dp = debug_points()
+        # print(debug.points)
         radius = 6
         for i in range(len(dp)):
             draw_call = dp[i]
@@ -255,7 +258,8 @@ class GameController(object):
                 pygame.draw.circle(self.screen, draw_call[1], (draw_call[2][0]+radius, draw_call[2][1]+radius), radius)
             if draw_call[0] == "line":
                 pygame.draw.line(self.screen, draw_call[1], (draw_call[2][0]+radius, draw_call[2][1]+radius), (draw_call[3][0]+radius, draw_call[3][1]+radius))
-            # time.sleep(0.01)
+            time.sleep(0.03)
+            pygame.display.update()
 
         debug_clear("frame")
         pygame.display.update()
