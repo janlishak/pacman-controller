@@ -101,7 +101,7 @@ class Pacman(Entity):
             predict(init_gs, options)
             # print(len(options))
 
-            for level in range(6):
+            for level in range(3):
                 leafs = []
                 for option in options:
                     predict(option, leafs)
@@ -225,8 +225,7 @@ def predict(init_gs, next_options):
                 best_direction = None
                 best_neigh = None
                 best_h = 100000000
-                goal = init_gs.pacman_node.position + (
-                            DIR2VEC[dir] * (delta - remaining_move_time) * init_gs.pacman_s)
+                goal = init_gs.pacman_node.position + (DIR2VEC[dir] * (delta - remaining_move_time) * init_gs.pacman_s)
                 # debug_point(goal.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
                 for next_direction in [UP, DOWN, LEFT, RIGHT]:
                     neigh = gs.blinky_bn.neighbors[next_direction]
