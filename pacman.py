@@ -88,8 +88,8 @@ class Pacman(Entity):
             init_gs.blinky_bn = self.ghosts.blinky.target
             init_gs.blinky_p = self.ghosts.blinky.position
             init_gs.blinky_s = self.ghosts.blinky.speed
-            init_gs.blinky_dv = DIR2VEC[self.ghosts.blinky.direction]
             init_gs.blinky_d = self.ghosts.blinky.direction
+            init_gs.blinky_dv = DIR2VEC[self.ghosts.blinky.direction]
 
             # MAKE PREDICTIONS
             options = []
@@ -100,9 +100,16 @@ class Pacman(Entity):
             if direction == STOP:
                 direction = self.direction
 
+            choice = None
             for option in init_gs.child:
                 if option.dir != direction:
                     debug_clear("1:" + str(option.dir))
+                else:
+                    choice = option
+
+            # DRAW FUTURE PREDICTIONS
+            # if choice != None:
+            #     predict(choice, options)
 
 
             # set new target_node
@@ -144,8 +151,8 @@ def predict(init_gs, next_options):
             gs.blinky_bn = init_gs.blinky_bn
             gs.blinky_p = init_gs.blinky_p
             gs.blinky_s = init_gs.blinky_s
-            gs.blinky_d = init_gs.blinky_dv
-            gs.blinky_dn = init_gs.blinky_d
+            gs.blinky_d = init_gs.blinky_d
+            gs.blinky_dv = init_gs.blinky_dv
 
             distance = init_gs.pacman_node.position.distanceTo(target_node.position)
             delta = distance / init_gs.pacman_s
@@ -159,7 +166,7 @@ def predict(init_gs, next_options):
 
             while time_to_target < remaining_move_time:
                 # blinky first segment
-                blinky_next_point = gs.blinky_p + (gs.blinky_d * gs.blinky_s * time_to_target)
+                blinky_next_point = gs.blinky_p + (gs.blinky_dv * gs.blinky_s * time_to_target)
                 debug_line(gs.blinky_a.asTuple(), blinky_next_point.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
                 segment_num = (segment_num + 1) % 4
 
@@ -173,7 +180,7 @@ def predict(init_gs, next_options):
                 debug_point(goal.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
                 for next_direction in [UP, DOWN, LEFT, RIGHT]:
                     neigh = gs.blinky_bn.neighbors[next_direction]
-                    if next_direction != gs.blinky_dn * -1 and neigh is not None and BLINKY in \
+                    if next_direction != gs.blinky_d * -1 and neigh is not None and BLINKY in \
                             gs.blinky_bn.access[next_direction]:
                         h = (neigh.position - goal).magnitudeSquared()
                         # debug_line(goal.asTuple(), neigh.position.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
@@ -187,12 +194,12 @@ def predict(init_gs, next_options):
                 gs.blinky_a = gs.blinky_b
                 gs.blinky_bn = best_neigh
                 gs.blinky_b = best_neigh.position
-                gs.blinky_dn = best_direction
-                gs.blinky_d = DIR2VEC[best_direction]
+                gs.blinky_d = best_direction
+                gs.blinky_dv = DIR2VEC[best_direction]
                 time_to_target = gs.blinky_p.distanceTo(gs.blinky_b) / gs.blinky_s
 
             # blinky last segment
-            blinky_next_point = gs.blinky_p + (gs.blinky_d * gs.blinky_s * remaining_move_time)
+            blinky_next_point = gs.blinky_p + (gs.blinky_dv * gs.blinky_s * remaining_move_time)
             debug_line(gs.blinky_a.asTuple(), blinky_next_point.asTuple(), LINE_COLORS[segment_num],
                        tag=gs.dir_tag)
 
