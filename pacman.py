@@ -21,6 +21,8 @@ class Pacman(Entity):
         self.ghosts = None
         self.visited = SymmetricHashMap()
 
+
+
     def reset(self):
         Entity.reset(self)
         self.direction = LEFT
@@ -81,6 +83,7 @@ class Pacman(Entity):
             init_gs.level = 0
             init_gs.pacman_s = self.speed
             init_gs.pacman_node = self.node
+            init_gs.dir = self.direction
 
             # blinky state
             init_gs.blinky_a = self.ghosts.blinky.node.position
@@ -100,7 +103,7 @@ class Pacman(Entity):
             predict(init_gs, options)
             # print(len(options))
 
-            for level in range(1):
+            for level in range(4):
                 leafs = []
                 for option in options:
                     predict(option, leafs)
@@ -121,12 +124,12 @@ class Pacman(Entity):
             # print(best_option.dir_tag)
             keepTags = [best_option.dir_tag]
             current = best_option
-            print("turn:")
-            print(best_option)
+            # print("turn:")
+            # print(best_option)
             while current.level > 1:
                 current = current.parent
                 keepTags.append(current.dir_tag)
-                print(current)
+                # print(current)
 
 
             # print(current, keepTags)
@@ -152,6 +155,7 @@ class Pacman(Entity):
             # CHOOSE
             direction = current.dir
             self.visited = current.visited
+            print(current.pacman_node.position)
 
             # set new target_node
             self.target = self.getNewTarget(direction)
@@ -175,7 +179,9 @@ class Pacman(Entity):
 def predict(init_gs, next_options):
     for dir in init_gs.pacman_node.neighbors:
         target_node = init_gs.pacman_node.neighbors[dir]
-        if target_node is not None and PACMAN in init_gs.pacman_node.access[dir]:
+        if target_node is not None and PACMAN in init_gs.pacman_node.access[dir] and init_gs.dir * -1 is not dir:
+
+
             # create new game_state
             gs = GameState()
             gs.level = init_gs.level + 1
@@ -195,6 +201,10 @@ def predict(init_gs, next_options):
             gs.blinky_s = init_gs.blinky_s
             gs.blinky_d = init_gs.blinky_d
             gs.blinky_dv = init_gs.blinky_dv
+
+            # check for obvious collision
+            if target_node.position == gs.blinky_a and gs.blinky_d == dir * -1:
+                continue
 
             distance = init_gs.pacman_node.position.distanceTo(target_node.position)
             delta = distance / init_gs.pacman_s
@@ -287,7 +297,7 @@ def predict(init_gs, next_options):
 
             gs.visited = init_gs.visited.clone()
             if not gs.visited.check(A, B):
-                gs.score += 10
+                gs.score += 100/gs.level
                 gs.visited.visit(A, B)
 
             # add to the list of options
