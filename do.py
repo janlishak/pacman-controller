@@ -42,8 +42,9 @@ class GameState:
 
 
 class SymmetricHashMap:
-    def __init__(self):
+    def __init__(self, node_group):
         self.map = {}
+        self.node_group = node_group
 
     def normalize_key(self, vertex_a, vertex_b):
         return tuple(sorted((vertex_a, vertex_b)))
@@ -53,10 +54,12 @@ class SymmetricHashMap:
         self.map[key] = True
 
     def check(self, vertex_a, vertex_b):
+        if self.node_group.n_nodes.get(vertex_a, False) or self.node_group.n_nodes.get(vertex_b, False):
+            return True
         key = self.normalize_key(vertex_a, vertex_b)
         return self.map.get(key, False)
 
     def clone(self):
-        copy_map = SymmetricHashMap()
+        copy_map = SymmetricHashMap(self.node_group)
         copy_map.map = self.map.copy()
         return copy_map

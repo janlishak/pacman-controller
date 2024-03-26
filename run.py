@@ -5,6 +5,7 @@ from pygame.locals import *
 import debug
 from constants import *
 from debug import debug_points, debug_clear, debug_point, debug_get_fps
+from do import SymmetricHashMap
 from pacman import Pacman
 from nodes import NodeGroup
 from pellets import PelletGroup
@@ -72,6 +73,8 @@ class GameController(object):
         self.mazedata.obj.denyGhostsAccess(self.ghosts, self.nodes)
 
         self.pacman.ghosts = self.ghosts
+        self.pacman.visited = SymmetricHashMap(self.nodes)
+
 
         # d = self.nodes.nodesLUT.items()
         # i = 0

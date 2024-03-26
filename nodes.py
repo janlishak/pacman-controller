@@ -39,10 +39,12 @@ class NodeGroup(object):
         self.nodeSymbols = ['+', 'P', 'n']
         self.pathSymbols = ['.', '-', '|', 'p']
         data = self.readMazeFile(level)
+        self.n_nodes = {}
         self.createNodeTable(data)
         self.connectHorizontally(data)
         self.connectVertically(data)
         self.homekey = None
+
 
     def readMazeFile(self, textfile):
         return np.loadtxt(textfile, dtype='<U1')
@@ -53,6 +55,9 @@ class NodeGroup(object):
                 if data[row][col] in self.nodeSymbols:
                     x, y = self.constructKey(col+xoffset, row+yoffset)
                     self.nodesLUT[(x, y)] = Node(x, y)
+                if data[row][col] == 'n':
+                    x, y = self.constructKey(col + xoffset, row + yoffset)
+                    self.n_nodes[(x, y)] = True
 
     def constructKey(self, x, y):
         return x * TILEWIDTH, y * TILEHEIGHT

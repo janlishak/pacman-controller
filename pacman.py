@@ -19,9 +19,7 @@ class Pacman(Entity):
         self.alive = True
         self.sprites = PacmanSprites(self)
         self.ghosts = None
-        self.visited = SymmetricHashMap()
-
-
+        self.visited = None
 
     def reset(self):
         Entity.reset(self)
@@ -103,7 +101,7 @@ class Pacman(Entity):
             predict(init_gs, options)
             # print(len(options))
 
-            for level in range(4):
+            for level in range(6):
                 leafs = []
                 for option in options:
                     predict(option, leafs)
@@ -155,7 +153,7 @@ class Pacman(Entity):
             # CHOOSE
             direction = current.dir
             self.visited = current.visited
-            print(current.pacman_node.position)
+            # print(current.pacman_node.position)
 
             # set new target_node
             self.target = self.getNewTarget(direction)
