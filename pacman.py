@@ -84,6 +84,7 @@ class Pacman(Entity):
 
             # blinky state
             init_gs.blinky_a = self.ghosts.blinky.node.position
+            init_gs.blinky_an = self.ghosts.blinky.node
             init_gs.blinky_b = self.ghosts.blinky.target.position
             init_gs.blinky_bn = self.ghosts.blinky.target
             init_gs.blinky_p = self.ghosts.blinky.position
@@ -98,15 +99,16 @@ class Pacman(Entity):
             # MAKE PREDICTIONS
             options = []
             predict(init_gs, options)
-            print(len(options))
+            # print(len(options))
 
-            for level in range(1):
+            for level in range(2):
                 leafs = []
                 for option in options:
                     predict(option, leafs)
                 options = leafs
 
-            print(len(options))
+            # print(len(options))
+            # print(options)
 
             # find the best
             best_option = options[-1]
@@ -117,23 +119,28 @@ class Pacman(Entity):
                 index -= 1
 
             # back track
-            print(best_option.dir_tag)
+            # print(best_option.dir_tag)
             keepTags = [best_option.dir_tag]
             current = best_option
             while current.level > 1:
                 current = current.parent
                 keepTags.append(current.dir_tag)
 
-            print(current, keepTags)
+            # print(current, keepTags)
+
+            # print(init_gs.child[0].dir_tag,init_gs.child[1].dir_tag,init_gs.child[2].dir_tag)
             # remove debug by tag
-            def remove_debug(gs):
-                debug_clear(gs.dir_tag)
-                # print(gs.dir_tag, end=" ")
+
+            def remove_debug(gs, rm):
+                if rm:
+                    debug_clear(gs.dir_tag)
                 if gs.child is not None:
                     for child in gs.child:
                         if child.dir_tag not in keepTags:
-                            remove_debug(child)
-            remove_debug(init_gs)
+                            remove_debug(child, True)
+                        else:
+                            remove_debug(child, False)
+            remove_debug(init_gs, True)
             # print()
 
             # CHOOSE
@@ -177,6 +184,7 @@ def predict(init_gs, next_options):
 
             # blinky clone
             gs.blinky_a = init_gs.blinky_a
+            gs.blinky_an = init_gs.blinky_an
             gs.blinky_b = init_gs.blinky_b
             gs.blinky_bn = init_gs.blinky_bn
             gs.blinky_p = init_gs.blinky_p
@@ -222,6 +230,7 @@ def predict(init_gs, next_options):
                 # move blinky
                 gs.blinky_p = gs.blinky_b
                 gs.blinky_a = gs.blinky_b
+                gs.blinky_an = gs.blinky_bn
                 gs.blinky_bn = best_neigh
                 gs.blinky_b = best_neigh.position
                 gs.blinky_d = best_direction
