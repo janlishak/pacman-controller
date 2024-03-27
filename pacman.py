@@ -130,6 +130,7 @@ class Pacman(Entity):
             # score
             init_gs.visited = self.visited
             init_gs.score = 0
+            init_gs.collected = 0
 
             # MAKE PREDICTIONS
             options = []
@@ -228,6 +229,7 @@ def predict(init_gs, next_options):
             gs.dir_tag = str(gs.level) + "#" + str(target_node.position.x//TILEWIDTH) + ":" + str(target_node.position.y//TILEWIDTH) + str(hash(gs))
             gs.parent = init_gs
             gs.score = init_gs.score
+            gs.collected = init_gs.collected
 
             # state reusable
             distance = init_gs.pacman_node.position.distanceTo(target_node.position)
@@ -268,7 +270,7 @@ def predict(init_gs, next_options):
                         gs.score -= 100
 
                 if target_node.position == gs.g[ghost].b:
-                    gs.score -= 250
+                    gs.score -= 150
 
                 remaining_move_time = delta
                 time_to_target = gs.g[ghost].p.distanceTo(gs.g[ghost].b) / gs.g[ghost].s
@@ -350,6 +352,18 @@ def predict(init_gs, next_options):
                                 gs.score -= 1000
                             else:
                                 gs.dbg += " ok"
+
+                    if gs.g[ghost].b == target_node.position:
+                        gs.score -= 50
+                        gs.dbg += "A?"
+
+                    if gs.g[ghost].a == target_node.position:
+                        gs.score -= 40
+                        gs.dbg += "B?"
+
+                    if gs.g[ghost].b == init_gs.pacman_node.position:
+                        gs.score -= 30
+                        gs.dbg += "C?"
     
                 # ghost last segment
                 ghost_next_point = gs.g[ghost].p + (gs.g[ghost].dv * gs.g[ghost].s * remaining_move_time)
@@ -377,7 +391,8 @@ def predict(init_gs, next_options):
 
             gs.visited = init_gs.visited.clone()
             if not gs.visited.check(A, B):
-                gs.score += 100/gs.level
+                gs.collected += 1
+                gs.score += 70/gs.collected + 80/gs.level
                 gs.visited.visit(A, B)
 
             # add to the list of options
