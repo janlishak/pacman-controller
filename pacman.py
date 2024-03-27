@@ -112,7 +112,7 @@ class Pacman(Entity):
             init_gs.g[INKY].p = self.ghosts.inky.position
             init_gs.g[INKY].s = self.ghosts.inky.speed
             init_gs.g[INKY].d = self.ghosts.inky.direction
-            init_gs.g[INKY].dv = DIR2VEC[self.ghosts.pinky.direction]
+            init_gs.g[INKY].dv = DIR2VEC[self.ghosts.inky.direction]
             init_gs.g[INKY].c = self.ghosts.inky.color
             init_gs.g[INKY].m = self.ghosts.inky.mode
 
@@ -136,7 +136,7 @@ class Pacman(Entity):
             predict(init_gs, options)
             # print(len(options))
 
-            overthink = 6
+            overthink = 5
             for level in range(overthink):
                 leafs = []
                 for option in options:
@@ -147,6 +147,7 @@ class Pacman(Entity):
             # print(options)
 
             # find the best
+            direction = self.direction
             if len(options) > 0:
                 best_option = options[-1]
                 index = len(options) - 1
@@ -184,14 +185,12 @@ class Pacman(Entity):
                             else:
                                 remove_debug(child, False)
                 remove_debug(init_gs, True)
-                # print()
-
-                # debug_point((16,64), (92,242,53), "df")
+                direction = current.dir
+                self.visited = current.visited
 
 
             # CHOOSE
-            direction = current.dir
-            self.visited = current.visited
+
             # print(current.pacman_node.position)
 
             # set new target_node
@@ -266,10 +265,10 @@ def predict(init_gs, next_options):
                         should_skip = True
                         break
                     else:
-                        gs.score -= 150
+                        gs.score -= 100
 
                 if target_node.position == gs.g[ghost].b:
-                    gs.score -= 150
+                    gs.score -= 250
 
                 remaining_move_time = delta
                 time_to_target = gs.g[ghost].p.distanceTo(gs.g[ghost].b) / gs.g[ghost].s
