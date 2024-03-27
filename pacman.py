@@ -147,45 +147,46 @@ class Pacman(Entity):
             # print(options)
 
             # find the best
-            best_option = options[-1]
-            index = len(options) - 1
-            while index >= 0:
-                if best_option.score < options[index].score:
-                    best_option = options[index]
-                index -= 1
+            if len(options) > 0:
+                best_option = options[-1]
+                index = len(options) - 1
+                while index >= 0:
+                    if best_option.score < options[index].score:
+                        best_option = options[index]
+                    index -= 1
 
-            # back track
-            # print(best_option.dir_tag)
-            keepTags = [best_option.dir_tag]
-            current = best_option
-            print("turn:")
-            print(best_option)
-            while current.level > 1:
-                current = current.parent
-                keepTags.append(current.dir_tag)
-                # print(current)
+                # back track
+                # print(best_option.dir_tag)
+                keepTags = [best_option.dir_tag]
+                current = best_option
+                print("turn:")
+                print(best_option)
+                while current.level > 1:
+                    current = current.parent
+                    keepTags.append(current.dir_tag)
+                    # print(current)
 
-            print(current)
-            # print(current, keepTags)
+                print(current)
+                # print(current, keepTags)
 
-            # print(init_gs.child[0].dir_tag,init_gs.child[1].dir_tag,init_gs.child[2].dir_tag)
-            # remove debug by tag
+                # print(init_gs.child[0].dir_tag,init_gs.child[1].dir_tag,init_gs.child[2].dir_tag)
+                # remove debug by tag
 
-            # print("considered: ")
-            def remove_debug(gs, rm):
-                if rm:
-                    # print(gs)
-                    debug_clear(gs.dir_tag)
-                if gs.child is not None:
-                    for child in gs.child:
-                        if child.dir_tag not in keepTags:
-                            remove_debug(child, True)
-                        else:
-                            remove_debug(child, False)
-            remove_debug(init_gs, True)
-            # print()
+                # print("considered: ")
+                def remove_debug(gs, rm):
+                    if rm:
+                        # print(gs)
+                        debug_clear(gs.dir_tag)
+                    if gs.child is not None:
+                        for child in gs.child:
+                            if child.dir_tag not in keepTags:
+                                remove_debug(child, True)
+                            else:
+                                remove_debug(child, False)
+                remove_debug(init_gs, True)
+                # print()
 
-            # debug_point((16,64), (92,242,53), "df")
+                # debug_point((16,64), (92,242,53), "df")
 
 
             # CHOOSE
@@ -311,20 +312,6 @@ def predict(init_gs, next_options):
                                 best_h = h
                                 best_direction = next_direction
                                 best_neigh = neigh
-                    if not best_direction:
-                        continue
-                        print("No ghost direction found")
-                        print("this is a bug")
-                        for next_direction in [UP, DOWN, LEFT, RIGHT]:
-                            neigh = gs.g[ghost].bn.neighbors[next_direction]
-                            if next_direction != gs.g[ghost].d * -1 and neigh is not None and PACMAN in \
-                                    gs.g[ghost].bn.access[next_direction]:
-                                h = (neigh.position - goal).magnitudeSquared()
-                                # debug_line(goal.asTuple(), neigh.position.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
-                                if h < best_h:
-                                    best_h = h
-                                    best_direction = next_direction
-                                    best_neigh = neigh
 
                     # move ghost
                     gs.g[ghost].p = gs.g[ghost].b
@@ -373,6 +360,9 @@ def predict(init_gs, next_options):
             if gs.parent and gs.parent.dir:
                 if gs.parent.dir * -1 == dir:
                     gs.score -= 1
+                if gs.parent.dir == dir:
+                    gs.score -= 1
+
 
             gs.visited = init_gs.visited.clone()
             if not gs.visited.check(A, B):
