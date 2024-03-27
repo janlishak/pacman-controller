@@ -313,6 +313,20 @@ def predict(init_gs, next_options):
                                 best_direction = next_direction
                                 best_neigh = neigh
 
+                    if not best_direction:
+                        continue
+                        print("No ghost direction found")
+                        for next_direction in [UP, DOWN, LEFT, RIGHT]:
+                            neigh = gs.g[ghost].bn.neighbors[next_direction]
+                            if next_direction != gs.g[ghost].d * -1 and neigh is not None and PACMAN in \
+                                    gs.g[ghost].bn.access[next_direction]:
+                                h = (neigh.position - goal).magnitudeSquared()
+                                # debug_line(goal.asTuple(), neigh.position.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
+                                if h < best_h:
+                                    best_h = h
+                                    best_direction = next_direction
+                                    best_neigh = neigh
+
                     # move ghost
                     gs.g[ghost].p = gs.g[ghost].b
                     gs.g[ghost].a = gs.g[ghost].b
@@ -359,8 +373,6 @@ def predict(init_gs, next_options):
 
             if gs.parent and gs.parent.dir:
                 if gs.parent.dir * -1 == dir:
-                    gs.score -= 1
-                if gs.parent.dir == dir:
                     gs.score -= 1
 
 
