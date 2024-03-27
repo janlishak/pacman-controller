@@ -91,6 +91,17 @@ class Pacman(Entity):
             init_gs.g[BLINKY].s = self.ghosts.blinky.speed
             init_gs.g[BLINKY].d = self.ghosts.blinky.direction
             init_gs.g[BLINKY].dv = DIR2VEC[self.ghosts.blinky.direction]
+            init_gs.g[BLINKY].c = self.ghosts.blinky.color
+
+            # pinky state
+            init_gs.g[PINKY].a = self.ghosts.pinky.node.position
+            init_gs.g[PINKY].b = self.ghosts.pinky.target.position
+            init_gs.g[PINKY].bn = self.ghosts.pinky.target
+            init_gs.g[PINKY].p = self.ghosts.pinky.position
+            init_gs.g[PINKY].s = self.ghosts.pinky.speed
+            init_gs.g[PINKY].d = self.ghosts.pinky.direction
+            init_gs.g[PINKY].dv = DIR2VEC[self.ghosts.pinky.direction]
+            init_gs.g[PINKY].c = self.ghosts.pinky.color
 
             # score
             init_gs.visited = self.visited
@@ -101,7 +112,8 @@ class Pacman(Entity):
             predict(init_gs, options)
             # print(len(options))
 
-            for level in range(1):
+            overthink = 4
+            for level in range(overthink):
                 leafs = []
                 for option in options:
                     predict(option, leafs)
@@ -192,7 +204,7 @@ def predict(init_gs, next_options):
             delta = distance / init_gs.pacman_s
 
             ##### ##### ##### GHOST n STUFF ##### ##### #####
-            for ghost in [BLINKY]:
+            for ghost in [BLINKY, PINKY]:
 
                 # ghost clone
                 gs.g[ghost].a = init_gs.g[ghost].a
@@ -202,6 +214,8 @@ def predict(init_gs, next_options):
                 gs.g[ghost].s = init_gs.g[ghost].s
                 gs.g[ghost].d = init_gs.g[ghost].d
                 gs.g[ghost].dv = init_gs.g[ghost].dv
+                gs.g[ghost].c = init_gs.g[ghost].c
+                LINE_COLORS = [gs.g[ghost].c]
     
                 # check for obvious collision
                 if target_node.position == gs.g[ghost].a and gs.g[ghost].d == dir * -1:
@@ -220,7 +234,7 @@ def predict(init_gs, next_options):
                     # ghost first segment
                     ghost_next_point = gs.g[ghost].p + (gs.g[ghost].dv * gs.g[ghost].s * time_to_target)
                     debug_line(gs.g[ghost].a.asTuple(), ghost_next_point.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
-                    segment_num = (segment_num + 1) % 4
+                    segment_num = (segment_num + 1) % len(LINE_COLORS)
     
                     # predict next direction
                     remaining_move_time -= time_to_target
@@ -240,6 +254,7 @@ def predict(init_gs, next_options):
                                 best_direction = next_direction
                                 best_neigh = neigh
                     if not best_direction:
+                        continue
                         print("No ghost direction found")
                         print("this is a bug")
                         for next_direction in [UP, DOWN, LEFT, RIGHT]:

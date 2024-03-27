@@ -52,4 +52,3 @@ DIR2VEC = {
     RIGHT: Vector2(1, 0),
     STOP: Vector2()
 }
-LINE_COLORS = [RED, GREEN, TEAL, WHITE]

@@ -24,6 +24,7 @@ class GhostState:
         self.s = None
         self.dv = None
         self.d = None
+        self.c = None
 class GameState:
     def __init__(self):
         # state
