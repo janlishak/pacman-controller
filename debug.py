@@ -1,5 +1,6 @@
 points = {}
 def debug_point(xy, color=None, tag="frame"):
+    return
     if(points.get(tag) == None):
         points[tag] = []
     points[tag].append(("point", color, xy))

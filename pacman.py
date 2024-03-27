@@ -136,7 +136,7 @@ class Pacman(Entity):
             predict(init_gs, options)
             # print(len(options))
 
-            overthink = 5
+            overthink = 6
             for level in range(overthink):
                 leafs = []
                 for option in options:
@@ -158,14 +158,14 @@ class Pacman(Entity):
             # print(best_option.dir_tag)
             keepTags = [best_option.dir_tag]
             current = best_option
-            # print("turn:")
+            print("turn:")
             print(best_option)
             while current.level > 1:
                 current = current.parent
                 keepTags.append(current.dir_tag)
                 # print(current)
 
-
+            print(current)
             # print(current, keepTags)
 
             # print(init_gs.child[0].dir_tag,init_gs.child[1].dir_tag,init_gs.child[2].dir_tag)
@@ -251,8 +251,13 @@ def predict(init_gs, next_options):
                 gs.g[ghost].dv = init_gs.g[ghost].dv
                 gs.g[ghost].c = init_gs.g[ghost].c
                 gs.g[ghost].m = init_gs.g[ghost].m
-                # LINE_COLORS = [gs.g[ghost].c]
-                LINE_COLORS = [(255, 0, 0), (0, 255, 0), (0, 0, 255),(255, 0, 255)]
+                LINE_COLORS = [gs.g[ghost].c]
+                # LINE_COLORS = [(255, 0, 0), (0, 255, 0), (0, 0, 255),(255, 0, 255)]
+
+
+                # if pacman has power pill
+                if gs.g[ghost].m.current not in [SCATTER, CHASE]:
+                    continue
 
                 # check for obvious collision
                 if target_node.position == gs.g[ghost].a:
@@ -263,17 +268,10 @@ def predict(init_gs, next_options):
                         gs.score -= 300
 
                 if target_node.position == gs.g[ghost].b:
-                    if gs.g[ghost].d == dir * -1:
-                        should_skip = True
-                        break
-                    else:
-                        gs.score -= 300
-
-                if gs.g[ghost].m.current not in [SCATTER, CHASE]:
-                    continue
+                    gs.score -= 300
 
                 remaining_move_time = delta
-                time_to_target = -0.00001 + gs.g[ghost].p.distanceTo(gs.g[ghost].b) / gs.g[ghost].s
+                time_to_target = gs.g[ghost].p.distanceTo(gs.g[ghost].b) / gs.g[ghost].s
                 segment_num = 0
 
                 dbg_count = 0
