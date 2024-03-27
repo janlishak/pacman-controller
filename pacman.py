@@ -106,26 +106,26 @@ class Pacman(Entity):
             init_gs.g[PINKY].m = self.ghosts.pinky.mode
 
             # inky state
-            init_gs.g[INKY].a = self.ghosts.pinky.node.position
-            init_gs.g[INKY].b = self.ghosts.pinky.target.position
-            init_gs.g[INKY].bn = self.ghosts.pinky.target
-            init_gs.g[INKY].p = self.ghosts.pinky.position - DIR2VEC[self.ghosts.pinky.direction * -1] * 3
-            init_gs.g[INKY].s = self.ghosts.pinky.speed
-            init_gs.g[INKY].d = self.ghosts.pinky.direction
+            init_gs.g[INKY].a = self.ghosts.inky.node.position
+            init_gs.g[INKY].b = self.ghosts.inky.target.position
+            init_gs.g[INKY].bn = self.ghosts.inky.target
+            init_gs.g[INKY].p = self.ghosts.inky.position
+            init_gs.g[INKY].s = self.ghosts.inky.speed
+            init_gs.g[INKY].d = self.ghosts.inky.direction
             init_gs.g[INKY].dv = DIR2VEC[self.ghosts.pinky.direction]
-            init_gs.g[INKY].c = self.ghosts.pinky.color
-            init_gs.g[INKY].m = self.ghosts.pinky.mode
+            init_gs.g[INKY].c = self.ghosts.inky.color
+            init_gs.g[INKY].m = self.ghosts.inky.mode
 
             # clyde state
-            init_gs.g[CLYDE].a = self.ghosts.pinky.node.position
-            init_gs.g[CLYDE].b = self.ghosts.pinky.target.position
-            init_gs.g[CLYDE].bn = self.ghosts.pinky.target
-            init_gs.g[CLYDE].p = self.ghosts.pinky.position - DIR2VEC[self.ghosts.pinky.direction * -1] * 3
-            init_gs.g[CLYDE].s = self.ghosts.pinky.speed
-            init_gs.g[CLYDE].d = self.ghosts.pinky.direction
-            init_gs.g[CLYDE].dv = DIR2VEC[self.ghosts.pinky.direction]
-            init_gs.g[CLYDE].c = self.ghosts.pinky.color
-            init_gs.g[CLYDE].m = self.ghosts.pinky.mode
+            init_gs.g[CLYDE].a = self.ghosts.clyde.node.position
+            init_gs.g[CLYDE].b = self.ghosts.clyde.target.position
+            init_gs.g[CLYDE].bn = self.ghosts.clyde.target
+            init_gs.g[CLYDE].p = self.ghosts.clyde.position
+            init_gs.g[CLYDE].s = self.ghosts.clyde.speed
+            init_gs.g[CLYDE].d = self.ghosts.clyde.direction
+            init_gs.g[CLYDE].dv = DIR2VEC[self.ghosts.clyde.direction]
+            init_gs.g[CLYDE].c = self.ghosts.clyde.color
+            init_gs.g[CLYDE].m = self.ghosts.clyde.mode
 
             # score
             init_gs.visited = self.visited
