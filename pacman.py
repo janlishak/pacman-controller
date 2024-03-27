@@ -354,15 +354,15 @@ def predict(init_gs, next_options):
                                 gs.dbg += " ok"
 
                     if gs.g[ghost].b == target_node.position:
-                        gs.score -= 50
+                        gs.score -= 120
                         gs.dbg += "A?"
 
                     if gs.g[ghost].a == target_node.position:
-                        gs.score -= 40
+                        gs.score -= 100
                         gs.dbg += "B?"
 
                     if gs.g[ghost].b == init_gs.pacman_node.position:
-                        gs.score -= 30
+                        gs.score -= 10
                         gs.dbg += "C?"
     
                 # ghost last segment
@@ -392,7 +392,7 @@ def predict(init_gs, next_options):
             gs.visited = init_gs.visited.clone()
             if not gs.visited.check(A, B):
                 gs.collected += 1
-                gs.score += 70/gs.collected + 80/gs.level
+                gs.score += 40/gs.collected + 80/gs.level
                 gs.visited.visit(A, B)
 
             # add to the list of options
