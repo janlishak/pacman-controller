@@ -266,10 +266,10 @@ def predict(init_gs, next_options):
                         should_skip = True
                         break
                     else:
-                        gs.score -= 300
+                        gs.score -= 150
 
                 if target_node.position == gs.g[ghost].b:
-                    gs.score -= 300
+                    gs.score -= 150
 
                 remaining_move_time = delta
                 time_to_target = gs.g[ghost].p.distanceTo(gs.g[ghost].b) / gs.g[ghost].s
