@@ -130,7 +130,8 @@ class GhostGroup(object):
         self.pinky = Pinky(node, pacman)
         self.inky = Inky(node, pacman, self.blinky)
         self.clyde = Clyde(node, pacman)
-        # self.ghosts = [self.blinky]
+        # enable all ghosts
+        # self.ghosts = [self.blinky, self.pinky]
         self.ghosts = [self.blinky, self.pinky, self.inky, self.clyde]
 
     def __iter__(self):
@@ -173,5 +174,5 @@ class GhostGroup(object):
         for ghost in self:
             ghost.render(screen)
             #debug
-            debug_point(ghost.goal.asTuple(), color=ghost.color)
+            # debug_point(ghost.goal.asTuple(), color=ghost.color)
 

@@ -1,4 +1,4 @@
-from constants import BLINKY, PINKY, INKY, CLYDE
+from constants import BLINKY, PINKY, INKY, CLYDE, DIR2NAME
 
 
 class DynamicObject:
@@ -33,6 +33,7 @@ class GameState:
         self.dir_tag = None
         self.child = []
         self.parent = None
+        self.dbg = ""
 
         # pacman
         self.pacman_s = None
@@ -55,7 +56,8 @@ class GameState:
         self.visited = None
 
     def __str__(self):
-        return f"Level: {self.level}, Direction: {self.dir}, Score: {self.score}"
+
+        return f"Level: {self.level}, Direction: {DIR2NAME[self.dir]}, Score: {self.score}, DBG: {self.dbg}"
 
 
 class SymmetricHashMap:

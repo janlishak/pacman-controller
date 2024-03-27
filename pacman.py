@@ -92,16 +92,40 @@ class Pacman(Entity):
             init_gs.g[BLINKY].d = self.ghosts.blinky.direction
             init_gs.g[BLINKY].dv = DIR2VEC[self.ghosts.blinky.direction]
             init_gs.g[BLINKY].c = self.ghosts.blinky.color
+            init_gs.g[BLINKY].m = self.ghosts.pinky.mode
 
             # pinky state
             init_gs.g[PINKY].a = self.ghosts.pinky.node.position
             init_gs.g[PINKY].b = self.ghosts.pinky.target.position
             init_gs.g[PINKY].bn = self.ghosts.pinky.target
-            init_gs.g[PINKY].p = self.ghosts.pinky.position
+            init_gs.g[PINKY].p = self.ghosts.pinky.position - DIR2VEC[self.ghosts.pinky.direction * -1] * 3
             init_gs.g[PINKY].s = self.ghosts.pinky.speed
             init_gs.g[PINKY].d = self.ghosts.pinky.direction
             init_gs.g[PINKY].dv = DIR2VEC[self.ghosts.pinky.direction]
             init_gs.g[PINKY].c = self.ghosts.pinky.color
+            init_gs.g[PINKY].m = self.ghosts.pinky.mode
+
+            # inky state
+            init_gs.g[INKY].a = self.ghosts.pinky.node.position
+            init_gs.g[INKY].b = self.ghosts.pinky.target.position
+            init_gs.g[INKY].bn = self.ghosts.pinky.target
+            init_gs.g[INKY].p = self.ghosts.pinky.position - DIR2VEC[self.ghosts.pinky.direction * -1] * 3
+            init_gs.g[INKY].s = self.ghosts.pinky.speed
+            init_gs.g[INKY].d = self.ghosts.pinky.direction
+            init_gs.g[INKY].dv = DIR2VEC[self.ghosts.pinky.direction]
+            init_gs.g[INKY].c = self.ghosts.pinky.color
+            init_gs.g[INKY].m = self.ghosts.pinky.mode
+
+            # clyde state
+            init_gs.g[CLYDE].a = self.ghosts.pinky.node.position
+            init_gs.g[CLYDE].b = self.ghosts.pinky.target.position
+            init_gs.g[CLYDE].bn = self.ghosts.pinky.target
+            init_gs.g[CLYDE].p = self.ghosts.pinky.position - DIR2VEC[self.ghosts.pinky.direction * -1] * 3
+            init_gs.g[CLYDE].s = self.ghosts.pinky.speed
+            init_gs.g[CLYDE].d = self.ghosts.pinky.direction
+            init_gs.g[CLYDE].dv = DIR2VEC[self.ghosts.pinky.direction]
+            init_gs.g[CLYDE].c = self.ghosts.pinky.color
+            init_gs.g[CLYDE].m = self.ghosts.pinky.mode
 
             # score
             init_gs.visited = self.visited
@@ -112,7 +136,7 @@ class Pacman(Entity):
             predict(init_gs, options)
             # print(len(options))
 
-            overthink = 4
+            overthink = 5
             for level in range(overthink):
                 leafs = []
                 for option in options:
@@ -135,7 +159,7 @@ class Pacman(Entity):
             keepTags = [best_option.dir_tag]
             current = best_option
             # print("turn:")
-            # print(best_option)
+            print(best_option)
             while current.level > 1:
                 current = current.parent
                 keepTags.append(current.dir_tag)
@@ -147,8 +171,10 @@ class Pacman(Entity):
             # print(init_gs.child[0].dir_tag,init_gs.child[1].dir_tag,init_gs.child[2].dir_tag)
             # remove debug by tag
 
+            # print("considered: ")
             def remove_debug(gs, rm):
                 if rm:
+                    # print(gs)
                     debug_clear(gs.dir_tag)
                 if gs.child is not None:
                     for child in gs.child:
@@ -187,15 +213,19 @@ class Pacman(Entity):
 
 
 def predict(init_gs, next_options):
+    if init_gs.score < -1500:
+        # print("yeah, no thanks")
+        return
     for dir in init_gs.pacman_node.neighbors:
         target_node = init_gs.pacman_node.neighbors[dir]
-        if target_node is not None and PACMAN in init_gs.pacman_node.access[dir] and init_gs.dir * -1 is not dir:
+        # if target_node is not None and PACMAN in init_gs.pacman_node.access[dir] and init_gs.dir * -1 is not dir:
+        if target_node is not None and PACMAN in init_gs.pacman_node.access[dir]:
 
             # create new game_state
             gs = GameState()
             gs.level = init_gs.level + 1
             gs.dir = dir
-            gs.dir_tag = str(gs.level) + "#" + str(target_node.position.x//TILEWIDTH) + ":" + str(target_node.position.y//TILEWIDTH)
+            gs.dir_tag = str(gs.level) + "#" + str(target_node.position.x//TILEWIDTH) + ":" + str(target_node.position.y//TILEWIDTH) + str(hash(gs))
             gs.parent = init_gs
             gs.score = init_gs.score
 
@@ -203,8 +233,13 @@ def predict(init_gs, next_options):
             distance = init_gs.pacman_node.position.distanceTo(target_node.position)
             delta = distance / init_gs.pacman_s
 
+            # (debug) draw purple dot and line
+            debug_point(target_node.position.asTuple(), (200, 0, 200), gs.dir_tag)
+            debug_line(target_node.position.asTuple(), init_gs.pacman_node.position.asTuple(), (200, 0, 200), gs.dir_tag)
+
             ##### ##### ##### GHOST n STUFF ##### ##### #####
-            for ghost in [BLINKY, PINKY]:
+            should_skip = False
+            for ghost in [BLINKY, PINKY, INKY, CLYDE]:
 
                 # ghost clone
                 gs.g[ghost].a = init_gs.g[ghost].a
@@ -215,23 +250,39 @@ def predict(init_gs, next_options):
                 gs.g[ghost].d = init_gs.g[ghost].d
                 gs.g[ghost].dv = init_gs.g[ghost].dv
                 gs.g[ghost].c = init_gs.g[ghost].c
-                LINE_COLORS = [gs.g[ghost].c]
-    
+                gs.g[ghost].m = init_gs.g[ghost].m
+                # LINE_COLORS = [gs.g[ghost].c]
+                LINE_COLORS = [(255, 0, 0), (0, 255, 0), (0, 0, 255),(255, 0, 255)]
+
                 # check for obvious collision
-                if target_node.position == gs.g[ghost].a and gs.g[ghost].d == dir * -1:
+                if target_node.position == gs.g[ghost].a:
+                    if gs.g[ghost].d == dir * -1:
+                        should_skip = True
+                        break
+                    else:
+                        gs.score -= 300
+
+                if target_node.position == gs.g[ghost].b:
+                    if gs.g[ghost].d == dir * -1:
+                        should_skip = True
+                        break
+                    else:
+                        gs.score -= 300
+
+                if gs.g[ghost].m.current not in [SCATTER, CHASE]:
                     continue
-    
-    
+
                 remaining_move_time = delta
-                time_to_target = gs.g[ghost].p.distanceTo(gs.g[ghost].b) / gs.g[ghost].s
+                time_to_target = -0.00001 + gs.g[ghost].p.distanceTo(gs.g[ghost].b) / gs.g[ghost].s
                 segment_num = 0
-    
-                # (debug) draw purple dot and line
-                debug_point(target_node.position.asTuple(), (200, 0, 200), gs.dir_tag)
-                debug_line(target_node.position.asTuple(), init_gs.pacman_node.position.asTuple(), (200, 0, 200), gs.dir_tag)
-    
-                while time_to_target < remaining_move_time:
+
+                dbg_count = 0
+                while time_to_target <= remaining_move_time:
+                    dbg_count += 1
+                    if dbg_count > 10:
+                        break
                     # ghost first segment
+
                     ghost_next_point = gs.g[ghost].p + (gs.g[ghost].dv * gs.g[ghost].s * time_to_target)
                     debug_line(gs.g[ghost].a.asTuple(), ghost_next_point.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
                     segment_num = (segment_num + 1) % len(LINE_COLORS)
@@ -241,14 +292,23 @@ def predict(init_gs, next_options):
                     best_direction = None
                     best_neigh = None
                     best_h = 100000000
+
+
+                    # pacman as goal
                     goal = init_gs.pacman_node.position + (DIR2VEC[dir] * (delta - remaining_move_time) * init_gs.pacman_s)
-                    # debug_point(goal.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
+
+                    # pinky goal
+                    if ghost == PINKY:
+                        goal = init_gs.pacman_node.position + (DIR2VEC[dir] * (delta - remaining_move_time) * init_gs.pacman_s) + (DIR2VEC[dir] * TILEWIDTH * 4)
+
+                    debug_point(goal.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
                     for next_direction in [UP, DOWN, LEFT, RIGHT]:
                         neigh = gs.g[ghost].bn.neighbors[next_direction]
                         if next_direction != gs.g[ghost].d * -1 and neigh is not None and ghost in \
                                 gs.g[ghost].bn.access[next_direction]:
                             h = (neigh.position - goal).magnitudeSquared()
-                            # debug_line(goal.asTuple(), neigh.position.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
+                            # if ghost is []:
+                            #     debug_line(goal.asTuple(), neigh.position.asTuple(), LINE_COLORS[segment_num], tag=gs.dir_tag)
                             if h < best_h:
                                 best_h = h
                                 best_direction = next_direction
@@ -267,25 +327,7 @@ def predict(init_gs, next_options):
                                     best_h = h
                                     best_direction = next_direction
                                     best_neigh = neigh
-    
-                    # check for collision
-                    if gs.g[ghost].b == target_node.position:
-                        if best_direction == dir * -1:
-                            gs.score -= 1000
-                        else:
-                            d = goal - gs.g[ghost].b
-                            dSquared = d.magnitudeSquared()
-                            rSquared = (5 + 5) ** 2
-                            if dSquared <= rSquared:
-                                gs.score -= 1000
-    
-                    if gs.g[ghost].b == init_gs.pacman_node.position:
-                        d = goal - gs.g[ghost].b
-                        dSquared = d.magnitudeSquared()
-                        rSquared = (5 + 5) ** 2
-                        if dSquared <= rSquared:
-                            gs.score -= 1000
-    
+
                     # move ghost
                     gs.g[ghost].p = gs.g[ghost].b
                     gs.g[ghost].a = gs.g[ghost].b
@@ -294,12 +336,31 @@ def predict(init_gs, next_options):
                     gs.g[ghost].d = best_direction
                     gs.g[ghost].dv = DIR2VEC[best_direction]
                     time_to_target = gs.g[ghost].p.distanceTo(gs.g[ghost].b) / gs.g[ghost].s
+
+                    # check for collision
+                    gs.dbg += f" [{GHOST2NAME[ghost]}]"
+                    if gs.g[ghost].b == init_gs.pacman_node.position:
+                        if best_direction == dir * -1:
+                            gs.dbg += f" face"
+                            gs.score -= 1000
+                        else:
+                            d = goal - gs.g[ghost].b
+                            dSquared = d.magnitudeSquared()
+                            rSquared = (15) ** 2
+                            if dSquared <= rSquared:
+                                gs.dbg += " catch"
+                                gs.score -= 1000
+                            else:
+                                gs.dbg += " ok"
     
                 # ghost last segment
                 ghost_next_point = gs.g[ghost].p + (gs.g[ghost].dv * gs.g[ghost].s * remaining_move_time)
                 gs.g[ghost].p = ghost_next_point
                 debug_line(gs.g[ghost].a.asTuple(), ghost_next_point.asTuple(), LINE_COLORS[segment_num],
                            tag=gs.dir_tag)
+
+            if should_skip:
+                continue
 
             ##### ##### ##### GHOST n STUFF ##### ##### #####
 
@@ -310,6 +371,10 @@ def predict(init_gs, next_options):
             # rate the choice
             A = init_gs.pacman_node.position.asTuple()
             B = target_node.position.asTuple()
+
+            if gs.parent and gs.parent.dir:
+                if gs.parent.dir * -1 == dir:
+                    gs.score -= 1
 
             gs.visited = init_gs.visited.clone()
             if not gs.visited.check(A, B):

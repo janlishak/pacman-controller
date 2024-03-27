@@ -52,3 +52,18 @@ DIR2VEC = {
     RIGHT: Vector2(1, 0),
     STOP: Vector2()
 }
+
+DIR2NAME = {
+    UP: "UP",
+    DOWN: "DOWN",
+    LEFT: "LEFT",
+    RIGHT: "RIGHT",
+    STOP: "STOP"
+}
+
+GHOST2NAME = {
+    4: "BLINKY",
+    5: "PINKY",
+    6: "INKY",
+    7: "CLYDE",
+}
